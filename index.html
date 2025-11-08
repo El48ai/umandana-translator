@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Umandana Translator</title>
+
+  <!-- 🌸 Favicon -->
+  <link rel="icon" type="image/png" href="/umandana-translator/favicon.png" sizes="512x512" />
+  <link rel="icon" href="/umandana-translator/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/umandana-translator/favicon.png" />
+  <meta name="theme-color" content="#ec4899" />
+
+  <!-- 🌸 Open Graph -->
+  <meta property="og:title" content="Umandana Translator" />
+  <meta property="og:description" content="Ubah teks Latin ↔ Bahasa Umandana. Dibuat oleh ELPADRI, terinspirasi MutheJKT48." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://el48ai.github.io/umandana-translator/" />
+  <meta property="og:image" content="https://el48ai.github.io/umandana-translator/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- 🌸 Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Umandana Translator" />
+  <meta name="twitter:description" content="Ubah teks Latin ↔ Bahasa Umandana. Dibuat oleh ELPADRI, terinspirasi MutheJKT48." />
+  <meta name="twitter:image" content="https://el48ai.github.io/umandana-translator/og-image.png" />
+
+  <!-- 🌸 Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 🌸 React & Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    @keyframes wobble {
+      0% {transform: scale(1) rotate(0deg);}
+      25% {transform: scale(1.06) rotate(1deg);}
+      50% {transform: scale(1) rotate(0deg);}
+      75% {transform: scale(1.06) rotate(-1deg);}
+      100% {transform: scale(1) rotate(0deg);}
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-b from-pink-50 via-rose-50 to-white min-h-screen text-slate-900 overflow-hidden">
+  <canvas id="bubbleCanvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Peta Bahasa Umandana
+    const MAP_ENCODE = {
+      A:"Aiden",B:"Baiden",C:"Caiden",D:"Daiden",E:"Teiden",
+      F:"Faiden",G:"Gaiden",H:"Haiden",I:"Ipri",J:"Jaiden",
+      K:"Kaiden",L:"Laiden",M:"Maiden",N:"Naiden",O:"Opro",
+      P:"Paiden",Q:"Qaiden",R:"Raiden",S:"Saiden",T:"Tes",
+      U:"Upri",V:"Vaiden",W:"Waiden",X:"Xaiden",Y:"Yaiden",Z:"Zaiden"
+    };
+    const TOKENS = Object.values(MAP_ENCODE);
+    const MAP_DECODE = Object.fromEntries(Object.entries(MAP_ENCODE).map(([k,v])=>[v.toLowerCase(),k]));
+    const decodeRegex = new RegExp(
+      TOKENS.sort((a,b)=>b.length-a.length).map(t=>t.replace(/[-/\\^$*+?.()|[\]{}]/g,"\\$&")).join("|"),"gi"
+    );
+
+    const encodeUmandana = text =>
+      text.replace(/[A-Za-z]/g,ch=>{
+        const up = ch.toUpperCase();
+        const token = MAP_ENCODE[up];
+        if(!token) return ch;
+        return ch===up ? token : token.toLowerCase();
+      });
+
+    const decodeUmandana = text =>
+      text.replace(decodeRegex, m=>{
+        const letter = MAP_DECODE[m.toLowerCase()] || m;
+        return m[0]===m[0].toLowerCase()? letter.toLowerCase() : letter;
+      });
+
+    function App(){
+      const [mode,setMode] = React.useState("encode");
+      const [input,setInput] = React.useState("");
+      const [soundOn,setSoundOn] = React.useState(false);
+      const audioCtxRef = React.useRef(null);
+      const output = mode==="encode" ? encodeUmandana(input) : decodeUmandana(input);
+
+      const ensureAudio = async ()=>{
+        if(!audioCtxRef.current){
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if(!Ctx) return;
+          audioCtxRef.current = new Ctx();
+        }
+        if(audioCtxRef.current.state==="suspended"){
+          try{ await audioCtxRef.current.resume(); }catch(e){}
+        }
+      };
+
+      const copy = async ()=>{
+        try{ await navigator.clipboard.writeText(output); alert("Hasil disalin!"); }
+        catch{ alert("Gagal menyalin"); }
+      };
+
+      // Gelembung sabun + suara pop
+      React.useEffect(()=>{
+        const canvas = document.getElementById("bubbleCanvas");
+        const ctx = canvas.getContext("2d");
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+        const onResize = ()=>{ w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+        window.addEventListener("resize", onResize);
+
+        const bubbles = Array.from({length:40}, ()=>createBubble());
+        function createBubble(){
+          return {
+            x: Math.random()*w,
+            y: Math.random()*h,
+            r: Math.random()*12+6,
+            color:`hsla(${Math.random()*360},80%,75%,0.6)`,
+            sx: Math.random()*0.5-0.25,
+            sy: Math.random()*0.3-0.1
+          };
+        }
+
+        const playPop = ()=>{
+          if(!soundOn) return;
+          const ctxA = audioCtxRef.current;
+          if(!ctxA) return;
+          const now = ctxA.currentTime;
+          const osc = ctxA.createOscillator();
+          const gain = ctxA.createGain();
+          osc.type="sine";
+          const startF=520+Math.random()*120, endF=startF*0.6;
+          osc.frequency.setValueAtTime(startF,now);
+          osc.frequency.exponentialRampToValueAtTime(endF,now+0.09);
+          gain.gain.setValueAtTime(0.0001,now);
+          gain.gain.exponentialRampToValueAtTime(0.08,now+0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001,now+0.12);
+          osc.connect(gain); gain.connect(ctxA.destination);
+          osc.start(now); osc.stop(now+0.14);
+        };
+
+        let raf;
+        const loop=()=>{
+          ctx.clearRect(0,0,w,h);
+          ctx.globalAlpha=0.7;
+          bubbles.forEach(b=>{
+            b.x+=b.sx; b.y+=b.sy;
+            if(b.y<-20||b.x<-20||b.x>w+20){
+              playPop();
+              Object.assign(b,createBubble(),{y:h+20});
+            }
+            const grad=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+            grad.addColorStop(0,"white"); grad.addColorStop(1,b.color);
+            ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+            ctx.fillStyle=grad; ctx.fill();
+          });
+          raf=requestAnimationFrame(loop);
+        };
+        loop();
+        return()=>{cancelAnimationFrame(raf);window.removeEventListener("resize",onResize);};
+      },[soundOn]);
+
+      return (
+        <div className="relative z-10">
+          <main className="max-w-4xl mx-auto p-6">
+            <header className="text-center mb-6">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-pink-600 drop-shadow-sm inline-block" style={{animation:"wobble 3s ease-in-out infinite"}}>
+                💖 Umandana Translator 💖
+              </h1>
+              <p className="text-base md:text-lg text-rose-500 mt-3 animate-bounce">Ubah teks Latin ↔ Bahasa Umandana ✨</p>
+              <p className="text-sm text-pink-400 mt-4 italic font-medium">
+                🌸 Aplikasi ini dibuat oleh <b>ELPADRI</b>, fans JKT48.<br/>Terinspirasi oleh <b>MutheJKT48</b> 💕
+              </p>
+            </header>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-pink-600">Masukan</label>
+                <textarea value={input} onChange={e=>setInput(e.target.value)}
+                  placeholder={mode==='encode'?'Tulis teks biasa...':'Tempel teks Umandana...'}
+                  className="w-full h-48 p-3 rounded-2xl border border-pink-200 shadow-sm bg-white/80 focus:ring-2 focus:ring-pink-300 outline-none"></textarea>
+                <div className="flex gap-2 flex-wrap">
+                  <button onClick={()=>setMode(mode==='encode'?'decode':'encode')} className="px-4 py-2 rounded-xl border border-pink-200 bg-pink-100 text-pink-700 font-semibold hover:shadow transition">{mode==='encode'?'Encode →':'← Decode'}</button>
+                  <button onClick={()=>setInput('')} className="px-4 py-2 rounded-xl border border-rose-200 bg-rose-100 text-rose-700 font-semibold hover:shadow transition">Bersihkan</button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-pink-600">Hasil</label>
+                <textarea readOnly value={output}
+                  className="w-full h-48 p-3 rounded-2xl border border-pink-200 bg-pink-50 shadow-inner"></textarea>
+                <div className="flex gap-2">
+                  <button onClick={copy} className="px-4 py-2 rounded-xl border border-pink-200 bg-pink-100 text-pink-700 font-semibold hover:shadow transition">Salin Hasil</button>
+                  <button onClick={()=>setInput(output)} className="px-4 py-2 rounded-xl border border-rose-200 bg-rose-100 text-rose-700 font-semibold hover:shadow transition">Jadikan Masukan</button>
+                </div>
+              </div>
+            </div>
+
+            <section className="mt-8">
+              <details className="bg-white rounded-2xl border border-pink-200 p-4 shadow-sm">
+                <summary className="cursor-pointer font-semibold text-pink-600">🌈 Lihat Tabel A–Z</summary>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-sm">
+                  {Object.entries(MAP_ENCODE).map(([latin,um])=>(
+                    <div key={latin} className="flex justify-between px-3 py-2 rounded-xl bg-pink-50 border border-pink-200">
+                      <span className="font-semibold text-rose-600">{latin}</span>
+                      <span>{um}</span>
+                    </div>
+                  ))}
+                </div>
+              </details>
+              <p className="text-xs text-pink-400 mt-3">💫 Bahasa sandi buatan untuk hiburan & komunitas penggemar JKT48 💫</p>
+            </section>
+          </main>
+
+          <div className="fixed right-4 bottom-4">
+            <button onClick={async()=>{await ensureAudio();setSoundOn(v=>!v);}}
+              className={`px-4 py-2 rounded-2xl border transition font-semibold ${soundOn?'bg-pink-500 text-white border-pink-600':'bg-white/80 text-pink-700 border-pink-200'}`}>
+              {soundOn?'🔊 Suara: ON':'🔈 Suara: OFF'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+  </html>
