@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Umandana Translator — Dua Arah</title>
+  <link rel="manifest" href="/manifest.json"> <!-- Tambah buat PWA -->
   <style>
     :root{--bg:#0f172a;--card:#111827;--muted:#9ca3af;--text:#e5e7eb;--brand:#6366f1;--brand2:#22c55e}
     *{box-sizing:border-box}
@@ -13,7 +14,7 @@
     .subtitle{color:var(--muted);text-align:center;margin-top:-6px;margin-bottom:18px}
     .grid{display:grid;gap:16px;grid-template-columns:1fr;}
     @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);backdrop-filter: blur(8px);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
     .card h3{margin:0 0 8px;font-size:15px;color:#cbd5e1}
     .card .body{padding:14px}
     textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:var(--text);padding:12px;outline:none}
@@ -27,7 +28,7 @@
     .opt{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0b1020;border:1px solid rgba(255,255,255,.08);border-radius:12px}
     .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px dashed rgba(255,255,255,.2);color:#cbd5e1}
     .bubble{animation:pop .5s ease forwards;display:inline-block}
-    @keyframes pop{from{transform:translateY(6px) scale(.98);opacity:.0} to{transform:translateY(0) scale(1);opacity:1}}
+    @keyframes pop{from{transform:translateY(6px) scale(.98);opacity:.0}to{transform:translateY(0) scale(1);opacity:1}}
     .footer{opacity:.7;text-align:center;font-size:12px;margin:18px 0}
     a{color:#c7d2fe}
     .opts{display:grid;grid-template-columns:1fr;gap:8px}
@@ -91,10 +92,10 @@
 
 <script>
 (function(){
-  // tahun otomatis
+  // Tahun otomatis
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  const el = (id)=>document.getElementById(id);
+  const el = (id) => document.getElementById(id);
   const src = el('src'), dst = el('dst');
   const copyBtn = el('copyBtn'), clearBtn = el('clearBtn'), shareBtn = el('shareBtn'), downloadBtn = el('downloadBtn');
   const endOnly = el('endOnly'), strict = el('strict'), upper = el('upper');
@@ -102,168 +103,148 @@
   const modeIdToUm = el('modeIdToUm'), modeUmToId = el('modeUmToId');
   const endOnlyWrap = el('endOnlyWrap'), strictWrap = el('strictWrap');
 
-  function isLetter(ch){ return /[A-Za-z]/.test(ch); }
-  function isVowel(ch){ return /[AEIOUaeiou]/.test(ch); }
-
-  // Vokal: sesuai aturan terbaru (A → AIDEN)
-  const vokalMap = {
-    A: 'AIDEN', a:'aiden',
-    I: 'IPRI',  i:'ipri',
-    U: 'UPRU',  u:'upru',
-    E: 'EPRE',  e:'epre',
-    O: 'OPRO',  o:'opro'
-  };
-
-  function plusEs(ch, up){
-    const base = up ? ch.toUpperCase() : ch.toLowerCase();
-    return base + (up ? 'ES':'es');
+  // Debounce function
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
   }
 
-  // ENCODE: Indonesia → Umandana
-  function encodeUmandana(input){
-    if(!input) return '';
+  function isLetter(ch) { return /[A-Za-z]/.test(ch); }
+  function isVowel(ch) { return /[AEIOUaeiou]/.test(ch); }
+
+  // Vokal map
+  const vokalMap = {
+    A: 'AIDEN', a: 'aiden',
+    I: 'IPRI', i: 'ipri',
+    U: 'UPRU', u: 'upru',
+    E: 'EPRE', e: 'epre',
+    O: 'OPRO', o: 'opro'
+  };
+
+  function plusEs(ch, up) {
+    const base = up ? ch.toUpperCase() : ch.toLowerCase();
+    return base + (up ? 'ES' : 'es');
+  }
+
+  // ENCODE: Indonesia → Umandana (Optimized with regex)
+  function encodeUmandana(input) {
+    if (!input?.trim()) return '';
     const up = upper.checked;
     const useEndOnly = endOnly.checked && !strict.checked;
 
-    const words = input.split(/(\\s+)/); // pertahankan spasi
-    const converted = words.map(token=>{
-      if(/^\\s+$/.test(token)) return token; // spasi
-
-      const parts = token.match(/[A-Za-z]+|[^A-Za-z]+/g) || [token];
-      const convParts = parts.map(part=>{
-        if(!/[A-Za-z]/.test(part)) return part; // tanda baca tetap
-        let out='';
-        const letters = part.split('');
-        for(let i=0;i<letters.length;i++){
-          const ch = letters[i];
-          const next = letters[i+1]||'';
-
-          // NG → STRENG (semua posisi)
-          if((ch==='N'||ch==='n') && (next==='G'||next==='g')){
-            out += up ? 'STRENG':'streng';
-            i++; // skip G
-            continue;
-          }
-
-          // Vokal
-          if(isVowel(ch)){
-            out += vokalMap[ch] ?? ch;
-            continue;
-          }
-
-          // Konsonan
-          if(isLetter(ch)){
-            if(strict.checked){
-              out += plusEs(ch, up);
-            } else {
-              out += up ? ch.toUpperCase() : ch.toLowerCase();
-            }
-            continue;
-          }
-
-          out += ch;
-        }
-
-        if(useEndOnly){
-          const lastAlpha = (part.match(/[A-Za-z](?=[^A-Za-z]*$)/)||[''])[0];
-          if(lastAlpha && !isVowel(lastAlpha)){
-            const endsWithStreng = out.endsWith(up?'STRENG':'streng');
-            if(!endsWithStreng) out += up?'ES':'es';
-          }
-        }
-        return out;
-      });
-      return convParts.join('');
+    let out = input;
+    // Replace NG first
+    out = out.replace(/\bN(?=G)\w*/gi, (match) => {
+      return match.startsWith('NG') ? (up ? 'STRENG' : 'streng') : match;
+    });
+    // Replace vowels
+    Object.keys(vokalMap).forEach(v => {
+      const rep = vokalMap[v];
+      out = out.replace(new RegExp(`\\b${v}\\b`, 'gi'), rep);
     });
 
-    return converted.join('');
+    // Handle consonants with ES
+    if (strict.checked) {
+      out = out.replace(/[bcdfghjklmnpqrstvwxyz]/gi, ch => plusEs(ch, up));
+    } else if (useEndOnly) {
+      out = out.replace(/\b([bcdfghjklmnpqrstvwxyz])(?=[^A-Za-z]*$)/gi, ch => ch + (up ? 'ES' : 'es'));
+    }
+
+    return out;
   }
 
   // DECODE: Umandana → Indonesia
-  function decodeUmandana(input){
-    if(!input) return '';
-
-    const tokens = input.split(/(\\s+)/);
-    const decoded = tokens.map(tok=>{
-      if(/^\\s+$/.test(tok)) return tok;
-
-      const parts = tok.match(/[A-Za-z]+|[^A-Za-z]+/g) || [tok];
-      const conv = parts.map(part=>{
-        if(!/[A-Za-z]/.test(part)) return part;
-
-        let s = part;
-
-        // 1) STRENG -> NG (case-insensitive)
-        s = s.replace(/streng/gi,'NG');
-
-        // 2) Vokal (urutkan yang unik/panjang dulu)
-        s = s.replace(/aiden/gi,'A')
-             .replace(/ipri/gi,'I')
-             .replace(/upru/gi,'U')
-             .replace(/epre/gi,'E')
-             .replace(/opro/gi,'O');
-
-        // 3) Hilangkan ES setelah konsonan
-        s = s.replace(/([bcdfghjklmnpqrstvwxyz])es/gi,'$1');
-
-        return s;
-      });
-
-      return conv.join('');
+  function decodeUmandana(input) {
+    if (!input?.trim()) return '';
+    let out = input;
+    // Decode STRENG to NG
+    out = out.replace(/\bstreng/gi, 'NG');
+    // Decode vowels
+    Object.keys(vokalMap).forEach(v => {
+      const rep = vokalMap[v].toLowerCase();
+      out = out.replace(new RegExp(`\\b${rep}\\b`, 'gi'), v);
     });
-
-    return decoded.join('');
+    // Remove ES from consonants
+    out = out.replace(/([bcdfghjklmnpqrstvwxyz])es/gi, '$1');
+    return out;
   }
 
-  function syncOptionsVisibility(){
+  function syncOptionsVisibility() {
     const decoding = modeUmToId.checked;
-    // Saat DECODE, opsi encode dinonaktifkan agar tidak membingungkan
     endOnly.disabled = decoding; strict.disabled = decoding;
-    endOnlyWrap.style.opacity = decoding ? .6 : 1;
-    strictWrap.style.opacity = decoding ? .6 : 1;
+    endOnlyWrap.style.opacity = decoding ? 0.6 : 1;
+    strictWrap.style.opacity = decoding ? 0.6 : 1;
   }
 
-  function update(){
+  function update() {
     const val = src.value;
+    if (!val.trim()) {
+      dst.value = ''; dstChars.textContent = '0';
+      alert('Input kosong! Tulis sesuatu dulu.'); return;
+    }
     const out = modeUmToId.checked ? decodeUmandana(val) : encodeUmandana(val);
     dst.value = upper.checked ? out.toUpperCase() : out;
 
-    // counter
+    // Counter
     srcChars.textContent = val.length;
-    srcWords.textContent = (val.trim()? val.trim().split(/\\s+/).length : 0);
+    srcWords.textContent = val.trim().split(/\s+/).filter(w => w).length; // Fix word count
     dstChars.textContent = dst.value.length;
 
-    // animasi
+    // Animation
     dst.classList.remove('bubble'); void dst.offsetWidth; dst.classList.add('bubble');
   }
 
-  // Events
-  src.addEventListener('input', update);
+  // Debounced update
+  const debouncedUpdate = debounce(update, 300);
+  src.addEventListener('input', debouncedUpdate);
   endOnly.addEventListener('change', update);
-  strict.addEventListener('change', ()=>{ if(strict.checked) endOnly.checked=false; update(); });
+  strict.addEventListener('change', () => { if (strict.checked) endOnly.checked = false; update(); });
   upper.addEventListener('change', update);
-  modeIdToUm.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
-  modeUmToId.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
+  modeIdToUm.addEventListener('change', () => { syncOptionsVisibility(); update(); });
+  modeUmToId.addEventListener('change', () => { syncOptionsVisibility(); update(); });
 
-  clearBtn.addEventListener('click', ()=>{ src.value=''; update(); src.focus(); });
-  copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(dst.value); alert('Hasil disalin!'); } catch(e){ alert('Gagal menyalin: '+e.message); }});
-  shareBtn.addEventListener('click', async ()=>{ const text = dst.value || ''; if(navigator.share){ try{ await navigator.share({title:'Umandana',text}); } catch(e){} } else { alert('Peramban belum mendukung tombol Bagikan. Silakan salin teks.'); }});
-  downloadBtn.addEventListener('click', ()=>{ const blob = new Blob([dst.value], {type:'text/plain;charset=utf-8'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'umandana.txt'; a.click(); URL.revokeObjectURL(url); });
-
-  // Dialog contoh
-  document.getElementById('how').addEventListener('click', (e)=>{
-    e.preventDefault();
-    const contoh = [
-      ['RUMAH','RUPRU MAHES'],
-      ['ASING','AIDEN SIPRI STRENG'],
-      ['MATA','MAIDEN TAIDEN'],
-      ['BOLA','BOPRO LAIDEN'],
-      ['DUNIA','DUPRU NIPRI AIDEN']
-    ].map(([a,b])=>`• ${a} → ${b}`).join('\\n');
-    alert('Contoh:\\n'+contoh+'\\n\\nAturan:\\nA→AIDEN\\nI→IPRI\\nU→UPRU\\nE→EPRE\\nO→OPRO\\nNG→STRENG\\nKonsonan +ES');
+  clearBtn.addEventListener('click', () => { src.value = ''; update(); src.focus(); });
+  copyBtn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(dst.value); alert('Hasil disalin!'); }
+    catch (e) { alert('Gagal menyalin: ' + e.message); }
+  });
+  shareBtn.addEventListener('click', async () => {
+    const text = dst.value || '';
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Umandana', text }); }
+      catch (e) { alert('Gagal membagikan: ' + e.message); }
+    } else { alert('Peramban belum mendukung tombol Bagikan. Silakan salin teks.'); }
+  });
+  downloadBtn.addEventListener('click', () => {
+    const blob = new Blob([dst.value], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'umandana.txt'; a.click();
+    URL.revokeObjectURL(url);
   });
 
-  // seed demo
+  // Dialog contoh
+  how.addEventListener('click', (e) => {
+    e.preventDefault();
+    const contoh = [
+      ['RUMAH', 'RUPRU MAHES'], ['ASING', 'AIDEN SIPRI STRENG'],
+      ['MATA', 'MAIDEN TAIDEN'], ['BOLA', 'BOPRO LAIDEN'],
+      ['DUNIA', 'DUPRU NIPRI AIDEN']
+    ].map(([a, b]) => `• ${a} → ${b}`).join('\n');
+    alert('Contoh:\n' + contoh + '\n\nAturan:\nA→AIDEN\nI→IPRI\nU→UPRU\nE→EPRE\nO→OPRO\nNG→STRENG\nKonsonan +ES');
+  });
+
+  // History (localStorage)
+  function saveHistory(text) {
+    let history = JSON.parse(localStorage.getItem('umandanaHistory') || '[]');
+    history.unshift(text); history = history.slice(0, 5); // Keep last 5
+    localStorage.setItem('umandanaHistory', JSON.stringify(history));
+  }
+  src.addEventListener('input', () => saveHistory(src.value));
+
+  // Seed demo
   src.value = 'KITA PERGI MAKAN DI RUMAH TEMAN MALAM INI';
   syncOptionsVisibility();
   update();
