@@ -1,95 +1,3 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Umandana Translator — Dua Arah</title>
-  <link rel="manifest" href="/manifest.json"> <!-- Tambah buat PWA -->
-  <style>
-    :root{--bg:#0f172a;--card:#111827;--muted:#9ca3af;--text:#e5e7eb;--brand:#6366f1;--brand2:#22c55e}
-    *{box-sizing:border-box}
-    body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,rgba(99,102,241,.25),transparent),radial-gradient(900px 500px at 10% 10%,rgba(34,197,94,.2),transparent),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
-    .wrap{max-width:1000px;margin:24px auto;padding:16px}
-    .title{font-size:clamp(24px,2.8vw,36px);font-weight:800;letter-spacing:.2px;text-align:center;margin:8px 0 18px}
-    .subtitle{color:var(--muted);text-align:center;margin-top:-6px;margin-bottom:18px}
-    .grid{display:grid;gap:16px;grid-template-columns:1fr;}
-    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
-    .card h3{margin:0 0 8px;font-size:15px;color:#cbd5e1}
-    .card .body{padding:14px}
-    textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:var(--text);padding:12px;outline:none}
-    textarea:focus{border-color:rgba(99,102,241,.7);box-shadow:0 0 0 3px rgba(99,102,241,.25)}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:#eef1f7;padding:10px 14px;border-radius:12px;cursor:pointer}
-    .btn:hover{border-color:rgba(255,255,255,.25)}
-    .btn.primary{background:linear-gradient(135deg,var(--brand),#8b5cf6);border-color:transparent}
-    .btn.success{background:linear-gradient(135deg,var(--brand2),#16a34a);border-color:transparent}
-    .muted{color:var(--muted);font-size:13px}
-    .opt{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0b1020;border:1px solid rgba(255,255,255,.08);border-radius:12px}
-    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px dashed rgba(255,255,255,.2);color:#cbd5e1}
-    .bubble{animation:pop .5s ease forwards;display:inline-block}
-    @keyframes pop{from{transform:translateY(6px) scale(.98);opacity:.0}to{transform:translateY(0) scale(1);opacity:1}}
-    .footer{opacity:.7;text-align:center;font-size:12px;margin:18px 0}
-    a{color:#c7d2fe}
-    .opts{display:grid;grid-template-columns:1fr;gap:8px}
-    @media(min-width:820px){.opts{grid-template-columns:1fr 1fr}}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="title">Umandana Translator</div>
-    <div class="subtitle">Aplikasi ini di buat karena keluarga muthe jkt48 bicara ngomong bahasa umandana yg bikin olla jkt48 bingung nah ku buatlah ini biar olla gak di gibah muthe dan emak nya.</div>
-
-    <div class="grid">
-      <div class="card">
-        <div class="body">
-          <h3>Teks Asli</h3>
-          <textarea id="src" placeholder="Tulis teks di sini…"></textarea>
-          <div class="row" style="margin-top:8px">
-            <button type="button" class="btn" id="clearBtn">Bersihkan</button>
-            <span class="badge">Karakter: <span id="srcChars">0</span></span>
-            <span class="badge">Kata: <span id="srcWords">0</span></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="body">
-          <h3>Hasil</h3>
-          <textarea id="dst" readonly></textarea>
-          <div class="row" style="margin-top:8px">
-            <button type="button" class="btn primary" id="copyBtn">Salin</button>
-            <button type="button" class="btn" id="shareBtn">Bagikan</button>
-            <button type="button" class="btn success" id="downloadBtn">Unduh .txt</button>
-            <span class="badge">Karakter: <span id="dstChars">0</span></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:16px">
-      <div class="body">
-        <div class="opts">
-          <!-- MODE -->
-          <label class="opt"><input type="radio" name="mode" id="modeIdToUm" checked> Indonesia → Umandana</label>
-          <label class="opt"><input type="radio" name="mode" id="modeUmToId"> Umandana → Indonesia</label>
-
-          <!-- OPSI ENCODE -->
-          <label class="opt" id="endOnlyWrap"><input type="checkbox" id="endOnly" checked> ES hanya di <b>konsonan akhir kata</b></label>
-          <label class="opt" id="strictWrap"><input type="checkbox" id="strict"> Mode ketat: <b>semua konsonan +ES</b></label>
-
-          <!-- OUTPUT STYLE -->
-          <label class="opt"><input type="checkbox" id="upper" checked> Hasil <b>huruf besar</b></label>
-        </div>
-        <div class="muted" style="margin-top:8px">
-          Aturan dasar: A→AIDEN, I→IPRI, U→UPRU, E→EPRE, O→OPRO, NG→STRENG, konsonan +ES.
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">© <span id="year"></span> — Umandana Translator. Dibuat oleh El Padri. <a href="#" id="how">Lihat contoh</a></div>
-  </div>
-
 <script>
 (function(){
   // Tahun otomatis
@@ -102,6 +10,8 @@
   const srcChars = el('srcChars'), srcWords = el('srcWords'), dstChars = el('dstChars'), how = el('how');
   const modeIdToUm = el('modeIdToUm'), modeUmToId = el('modeUmToId');
   const endOnlyWrap = el('endOnlyWrap'), strictWrap = el('strictWrap');
+
+  console.log("Script loaded"); // Debug: Cek apakah script jalan
 
   // Debounce function
   function debounce(func, wait) {
@@ -129,7 +39,7 @@
     return base + (up ? 'ES' : 'es');
   }
 
-  // ENCODE: Indonesia → Umandana (Optimized with regex)
+  // ENCODE: Indonesia → Umandana
   function encodeUmandana(input) {
     if (!input?.trim()) return '';
     const up = upper.checked;
@@ -177,6 +87,7 @@
     endOnly.disabled = decoding; strict.disabled = decoding;
     endOnlyWrap.style.opacity = decoding ? 0.6 : 1;
     strictWrap.style.opacity = decoding ? 0.6 : 1;
+    console.log("Mode:", decoding ? "Umandana → Indonesia" : "Indonesia → Umandana"); // Debug mode
   }
 
   function update() {
@@ -187,10 +98,11 @@
     }
     const out = modeUmToId.checked ? decodeUmandana(val) : encodeUmandana(val);
     dst.value = upper.checked ? out.toUpperCase() : out;
+    console.log("Processing:", val, "→", out); // Debug output
 
     // Counter
     srcChars.textContent = val.length;
-    srcWords.textContent = val.trim().split(/\s+/).filter(w => w).length; // Fix word count
+    srcWords.textContent = val.trim().split(/\s+/).filter(w => w).length;
     dstChars.textContent = dst.value.length;
 
     // Animation
@@ -236,19 +148,21 @@
     alert('Contoh:\n' + contoh + '\n\nAturan:\nA→AIDEN\nI→IPRI\nU→UPRU\nE→EPRE\nO→OPRO\nNG→STRENG\nKonsonan +ES');
   });
 
-  // History (localStorage)
+  // History
   function saveHistory(text) {
     let history = JSON.parse(localStorage.getItem('umandanaHistory') || '[]');
-    history.unshift(text); history = history.slice(0, 5); // Keep last 5
+    history.unshift(text); history = history.slice(0, 5);
     localStorage.setItem('umandanaHistory', JSON.stringify(history));
   }
   src.addEventListener('input', () => saveHistory(src.value));
 
+  // Ensure default mode on load
+  modeIdToUm.checked = true; // Force default to Indonesia → Umandana
+  syncOptionsVisibility();
+  update();
+
   // Seed demo
   src.value = 'KITA PERGI MAKAN DI RUMAH TEMAN MALAM INI';
-  syncOptionsVisibility();
   update();
 })();
 </script>
-</body>
-</html>
