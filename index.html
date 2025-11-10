@@ -7,13 +7,18 @@
   <style>
     :root{
       --bg:#0f172a;--card:#111827;--muted:#9ca3af;--text:#e5e7eb;--brand:#6366f1;--brand2:#22c55e;
+      /* dipakai semua komponen agar ikut tema */
+      --surface:#0b1020;
+      --border:rgba(255,255,255,.12);
+      --border-hover:rgba(255,255,255,.25);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      background:radial-gradient(1200px 600px at 70% -10%,rgba(99,102,241,.25),transparent),
-                 radial-gradient(900px 500px at 10% 10%,rgba(34,197,94,.2),transparent),
-                 var(--bg);
+      background:
+        radial-gradient(1200px 600px at 70% -10%,rgba(99,102,241,.25),transparent),
+        radial-gradient(900px 500px at 10% 10%,rgba(34,197,94,.2),transparent),
+        var(--bg);
       color:var(--text);
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
     }
@@ -22,29 +27,46 @@
     .subtitle{color:var(--muted);text-align:center;margin-top:-6px;margin-bottom:18px}
     .grid{display:grid;gap:16px;grid-template-columns:1fr;}
     @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);backdrop-filter: blur(8px);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      backdrop-filter: blur(8px);
+      border-radius:16px;
+      box-shadow:0 8px 30px rgba(0,0,0,.35)
+    }
     .card h3{margin:0 0 8px;font-size:15px;color:#cbd5e1}
     .card .body{padding:14px}
-    textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:var(--text);padding:12px;outline:none}
+    textarea{
+      width:100%;min-height:220px;border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--surface);
+      color:var(--text);padding:12px;outline:none
+    }
     textarea:focus{border-color:rgba(99,102,241,.7);box-shadow:0 0 0 3px rgba(99,102,241,.25)}
     .row{display:flex;gap:8px;flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:#eef1f7;padding:10px 14px;border-radius:12px;cursor:pointer}
-    .btn:hover{border-color:rgba(255,255,255,.25)}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--border);
+      background:var(--surface);
+      color:#eef1f7;padding:10px 14px;border-radius:12px;cursor:pointer
+    }
+    .btn:hover{border-color:var(--border-hover)}
     .btn.primary{background:linear-gradient(135deg,var(--brand),#8b5cf6);border-color:transparent}
     .btn.success{background:linear-gradient(135deg,var(--brand2),#16a34a);border-color:transparent}
     .muted{color:var(--muted);font-size:13px}
-    .opt{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0b1020;border:1px solid rgba(255,255,255,.08);border-radius:12px}
-    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px dashed rgba(255,255,255,.2);color:#cbd5e1}
+    .opt{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px dashed var(--border);color:#cbd5e1}
     .bubble{animation:pop .5s ease forwards;display:inline-block}
-    @keyframes pop{from{transform:translateY(6px) scale(.98);opacity:.0} to{transform:translateY(0) scale(1);opacity:1}}
+    @keyframes pop{from{transform:translateY(6px) scale(.98);opacity:0} to{transform:translateY(0) scale(1);opacity:1}}
     .footer{opacity:.7;text-align:center;font-size:12px;margin:18px 0}
     a{color:#c7d2fe}
     .opts{display:grid;grid-template-columns:1fr;gap:8px}
     @media(min-width:820px){.opts{grid-template-columns:1fr 1fr}}
 
-    /* ==== Tema tambahan ==== */
+    /* ====== TEMA ====== */
     body[data-theme="neon"]{
       --bg:#0f172a;--card:#111827;--muted:#9ca3af;--text:#e5e7eb;--brand:#6366f1;--brand2:#22c55e;
+      --surface:#0b1020; --border:rgba(255,255,255,.12); --border-hover:rgba(255,255,255,.25);
       background:
         radial-gradient(1200px 600px at 70% -10%, rgba(99,102,241,.25), transparent),
         radial-gradient(900px 500px at 10% 10%, rgba(34,197,94,.2), transparent),
@@ -52,6 +74,7 @@
     }
     body[data-theme="ocean"]{
       --bg:#071a2c;--card:#0b2236;--muted:#9cc1d8;--text:#e6f4ff;--brand:#2dd4bf;--brand2:#38bdf8;
+      --surface:#0b2236; --border:rgba(255,255,255,.18); --border-hover:rgba(255,255,255,.32);
       background:
         radial-gradient(1000px 500px at 20% -10%, rgba(56,189,248,.25), transparent),
         radial-gradient(900px 500px at 90% 20%, rgba(45,212,191,.18), transparent),
@@ -59,6 +82,7 @@
     }
     body[data-theme="sakura"]{
       --bg:#1a0f17;--card:#24111d;--muted:#f5c2d6;--text:#ffeef5;--brand:#f472b6;--brand2:#fb7185;
+      --surface:#24111d; --border:rgba(255,255,255,.22); --border-hover:rgba(255,255,255,.4);
       background:
         radial-gradient(1100px 600px at 80% -10%, rgba(244,114,182,.28), transparent),
         radial-gradient(800px 450px at 10% 20%, rgba(251,113,133,.18), transparent),
@@ -66,14 +90,16 @@
     }
     body[data-theme="latte"]{
       --bg:#f7f3ee;--card:#ffffff;--muted:#6b7280;--text:#111827;--brand:#d97706;--brand2:#10b981;
+      --surface:#ffffff; --border:rgba(0,0,0,.14); --border-hover:rgba(0,0,0,.28);
       background:
         radial-gradient(1000px 520px at 70% -10%, rgba(217,119,6,.15), transparent),
         radial-gradient(900px 480px at 10% 10%, rgba(16,185,129,.12), transparent),
         var(--bg);
     }
-    /* Tema JKT48 */
+    /* Tema JKT48 (neon merah) */
     body[data-theme="jkt48"]{
       --bg:#e50914;--card:#ff0f1e;--muted:#ffd7db;--text:#fffaf5;--brand:#ffffff;--brand2:#ffe082;
+      --surface:rgba(255,255,255,.10); --border:rgba(255,255,255,.35); --border-hover:#fff;
       background:
         radial-gradient(900px 480px at 20% -10%, rgba(255,255,255,.20), transparent),
         radial-gradient(1000px 520px at 85% 0%, rgba(255,224,130,.20), transparent),
@@ -88,21 +114,6 @@
       text-shadow:0 0 6px #fff,0 0 14px #fff,0 0 26px #ffe082,0 0 48px #ffe082;
       letter-spacing:1px;
     }
-    body[data-theme="jkt48"] textarea,
-    body[data-theme="jkt48"] .btn{
-      background: rgba(255,255,255,.10);
-      border-color: rgba(255,255,255,.35);
-      color:#fff;
-    }
-    body[data-theme="jkt48"] .btn.primary{
-      background:#ffffff;color:#e50914;border-color:transparent;
-      box-shadow:0 0 6px #fff,0 0 18px #fff,0 0 34px rgba(255,255,255,.8);
-    }
-    body[data-theme="jkt48"] .btn.success{
-      background:#ffe082;color:#8b0000;border-color:transparent;
-      box-shadow:0 0 6px #ffe082,0 0 18px #ffe082,0 0 34px rgba(255,224,130,.85);
-    }
-    body[data-theme="jkt48"] .badge{border-color:rgba(255,255,255,.6);color:#fff;}
     body[data-theme="jkt48"] a{color:#fff;text-decoration:underline;}
     body[data-theme="jkt48"]::before{
       content:"JKT48   JKT48   JKT48   JKT48   JKT48";
@@ -112,9 +123,13 @@
     }
   </style>
 </head>
-<body>
+
+<!-- tema awal dipasang agar aktif sebelum JS -->
+<body data-theme="neon">
   <div class="wrap">
     <div class="title">Umandana Translator</div>
+
+    <!-- Kontrol Tema -->
     <div class="row" style="justify-content:center; margin-bottom:8px">
       <label class="badge" style="cursor:pointer">
         Tema:
@@ -132,7 +147,10 @@
       </label>
     </div>
 
-    <div class="subtitle">Aplikasi ini dibuat karena keluarga Muthe JKT48 bicara bahasa Umandana yang bikin Olla JKT48 bingung — jadi dibuatlah ini biar Olla gak digibah Muthe dan emaknya 😆</div>
+    <div class="subtitle">
+      Aplikasi ini dibuat karena keluarga Muthe JKT48 bicara bahasa Umandana yang bikin Olla JKT48 bingung —
+      jadi dibuatlah ini biar Olla gak digibah Muthe dan emaknya. 😆
+    </div>
 
     <div class="grid">
       <div class="card">
@@ -166,8 +184,10 @@
         <div class="opts">
           <label class="opt"><input type="radio" name="mode" id="modeIdToUm" checked> Indonesia → Umandana</label>
           <label class="opt"><input type="radio" name="mode" id="modeUmToId"> Umandana → Indonesia</label>
+
           <label class="opt" id="endOnlyWrap"><input type="checkbox" id="endOnly" checked> ES hanya di <b>konsonan akhir kata</b></label>
           <label class="opt" id="strictWrap"><input type="checkbox" id="strict"> Mode ketat: <b>semua konsonan +ES</b></label>
+
           <label class="opt"><input type="checkbox" id="upper" checked> Hasil <b>huruf besar</b></label>
         </div>
         <div class="muted" style="margin-top:8px">
@@ -181,76 +201,213 @@
 
 <script>
 (function(){
+  // Tahun otomatis
   document.getElementById('year').textContent = new Date().getFullYear();
-  const el=(id)=>document.getElementById(id);
-  const src=el('src'), dst=el('dst');
-  const copyBtn=el('copyBtn'), clearBtn=el('clearBtn'), shareBtn=el('shareBtn'), downloadBtn=el('downloadBtn');
-  const endOnly=el('endOnly'), strict=el('strict'), upper=el('upper');
-  const srcChars=el('srcChars'), srcWords=el('srcWords'), dstChars=el('dstChars'), how=el('how');
-  const modeIdToUm=el('modeIdToUm'), modeUmToId=el('modeUmToId');
-  const endOnlyWrap=el('endOnlyWrap'), strictWrap=el('strictWrap');
 
-  const themeSel=el('themeSel'), randomThemeBtn=el('randomTheme'), autoRotate=el('autoRotate');
-  const THEMES=['neon','ocean','sakura','latte','jkt48'];
+  const el = (id)=>document.getElementById(id);
+  const src = el('src'), dst = el('dst');
+  const copyBtn = el('copyBtn'), clearBtn = el('clearBtn'), shareBtn = el('shareBtn'), downloadBtn = el('downloadBtn');
+  const endOnly = el('endOnly'), strict = el('strict'), upper = el('upper');
+  const srcChars = el('srcChars'), srcWords = el('srcWords'), dstChars = el('dstChars'), how = el('how');
+  const modeIdToUm = el('modeIdToUm'), modeUmToId = el('modeUmToId');
+  const endOnlyWrap = el('endOnlyWrap'), strictWrap = el('strictWrap');
+
+  // ====== Tema ======
+  const themeSel = el('themeSel'), randomThemeBtn = el('randomTheme'), autoRotate = el('autoRotate');
+  const THEMES = ['neon','ocean','sakura','latte','jkt48'];
 
   function applyTheme(name){
     document.body.setAttribute('data-theme', name);
     localStorage.setItem('umandana-theme', name);
   }
-  const savedTheme=localStorage.getItem('umandana-theme')||'neon';
+  const savedTheme = localStorage.getItem('umandana-theme') || document.body.getAttribute('data-theme') || 'neon';
   applyTheme(savedTheme);
-  themeSel.value=savedTheme;
-  themeSel.addEventListener('change',e=>applyTheme(e.target.value));
-  randomThemeBtn.addEventListener('click',()=>{
-    let pick;do{pick=THEMES[Math.floor(Math.random()*THEMES.length)];}while(pick===document.body.getAttribute('data-theme'));
-    themeSel.value=pick;applyTheme(pick);
+  themeSel.value = savedTheme;
+
+  themeSel.addEventListener('change', (e)=> applyTheme(e.target.value));
+  randomThemeBtn.addEventListener('click', ()=>{
+    let pick;
+    do{ pick = THEMES[Math.floor(Math.random()*THEMES.length)]; }
+    while(pick === document.body.getAttribute('data-theme'));
+    themeSel.value = pick; applyTheme(pick);
   });
   let rotateTimer=null;
-  function startRotate(){stopRotate();rotateTimer=setInterval(()=>{randomThemeBtn.click();},2*60*1000);}
-  function stopRotate(){if(rotateTimer){clearInterval(rotateTimer);rotateTimer=null;}}
-  autoRotate.addEventListener('change',e=>e.target.checked?startRotate():stopRotate());
+  function startRotate(){ stopRotate(); rotateTimer = setInterval(()=>randomThemeBtn.click(), 2*60*1000); }
+  function stopRotate(){ if(rotateTimer){ clearInterval(rotateTimer); rotateTimer=null; } }
+  autoRotate.addEventListener('change', (e)=> e.target.checked ? startRotate() : stopRotate());
 
-  function isLetter(ch){return/[A-Za-z]/.test(ch);}
-  function isVowel(ch){return/[AEIOUaeiou]/.test(ch);}
-  const vokalMap={A:'AIDEN',a:'aiden',I:'IPRI',i:'ipri',U:'UPRU',u:'upru',E:'EPRE',e:'epre',O:'OPRO',o:'opro'};
-  function plusEs(ch,up){const base=up?ch.toUpperCase():ch.toLowerCase();return base+(up?'ES':'es');}
+  // ====== Helper huruf ======
+  function isLetter(ch){ return /[A-Za-z]/.test(ch); }
+  function isVowel(ch){ return /[AEIOUaeiou]/.test(ch); }
 
+  // Vokal
+  const vokalMap = {
+    A:'AIDEN', a:'aiden',
+    I:'IPRI',  i:'ipri',
+    U:'UPRU',  u:'upru',
+    E:'EPRE',  e:'epre',
+    O:'OPRO',  o:'opro'
+  };
+
+  function plusEs(ch, up){ const base = up ? ch.toUpperCase() : ch.toLowerCase(); return base + (up ? 'ES' : 'es'); }
+
+  // ====== ENCODE: Indonesia → Umandana ======
   function encodeUmandana(input){
-    if(!input)return'';const up=upper.checked;const useEndOnly=endOnly.checked&&!strict.checked;
-    const words=input.split(/(\s+)/);
-    const converted=words.map(token=>{
-      if(/^\s+$/.test(token))return token;
-      const parts=token.match(/[A-Za-z]+|[^A-Za-z]+/g)||[token];
-      const convParts=parts.map(part=>{
-        if(!/[A-Za-z]/.test(part))return part;
-        let out='';const letters=part.split('');
+    if(!input) return '';
+    const up = upper.checked;
+    const useEndOnly = endOnly.checked && !strict.checked;
+
+    const words = input.split(/(\s+)/); // pertahankan spasi
+    const converted = words.map(token=>{
+      if(/^\s+$/.test(token)) return token; // spasi
+
+      const parts = token.match(/[A-Za-z]+|[^A-Za-z]+/g) || [token];
+      const convParts = parts.map(part=>{
+        if(!/[A-Za-z]/.test(part)) return part; // tanda baca tetap
+        let out='';
+        const letters = part.split('');
         for(let i=0;i<letters.length;i++){
-          const ch=letters[i];const next=letters[i+1]||'';
-          if((ch==='N'||ch==='n')&&(next==='G'||next==='g')){out+=up?'STRENG':'streng';i++;continue;}
-          if(isVowel(ch)){out+=vokalMap[ch]??ch;continue;}
-          if(isLetter(ch)){
-            if(strict.checked){out+=plusEs(ch,up);}else{out+=up?ch.toUpperCase():ch.toLowerCase();}
+          const ch = letters[i];
+          const next = letters[i+1]||'';
+
+          // NG → STRENG
+          if((ch==='N'||ch==='n') && (next==='G'||next==='g')){
+            out += up ? 'STRENG' : 'streng';
+            i++; // skip G
             continue;
           }
-          out+=ch;
+
+          // Vokal
+          if(isVowel(ch)){
+            out += vokalMap[ch] ?? ch;
+            continue;
+          }
+
+          // Konsonan
+          if(isLetter(ch)){
+            if(strict.checked){
+              out += plusEs(ch, up);
+            } else {
+              out += up ? ch.toUpperCase() : ch.toLowerCase();
+            }
+            continue;
+          }
+
+          out += ch;
         }
+
+        // Tambah ES di akhir kata (konsonan) jika endOnly aktif
         if(useEndOnly){
-          const lastAlpha=(part.match(/[A-Za-z](?=[^A-Za-z]*$)/)||[''])[0];
-          if(lastAlpha&&!isVowel(lastAlpha)){
-            const endsWithStreng=out.endsWith(up?'STRENG':'streng');
-            if(!endsWithStreng)out+=up?'ES':'es';
+          const lastAlpha = (part.match(/[A-Za-z](?=[^A-Za-z]*$)/)||[''])[0];
+          if(lastAlpha && !isVowel(lastAlpha)){
+            const endsWithStreng = out.endsWith(up?'STRENG':'streng');
+            if(!endsWithStreng) out += up?'ES':'es';
           }
         }
         return out;
       });
       return convParts.join('');
     });
+
     return converted.join('');
   }
 
+  // ====== DECODE: Umandana → Indonesia ======
   function decodeUmandana(input){
-    if(!input)return'';
-    const tokens=input.split(/(\s+)/);
-    const decoded=tokens.map(tok=>{
-      if(/^\s+$/.test(tok))return tok;
-      const parts=tok.match
+    if(!input) return '';
+    const tokens = input.split(/(\s+)/);
+    const decoded = tokens.map(tok=>{
+      if(/^\s+$/.test(tok)) return tok;
+
+      const parts = tok.match(/[A-Za-z]+|[^A-Za-z]+/g) || [tok];
+      const conv = parts.map(part=>{
+        if(!/[A-Za-z]/.test(part)) return part;
+        let s = part;
+
+        // 1) STRENG -> NG (case-insensitive)
+        s = s.replace(/streng/gi,'NG');
+
+        // 2) Vokal panjang → vokal asli
+        s = s.replace(/aiden/gi,'A')
+             .replace(/ipri/gi,'I')
+             .replace(/upru/gi,'U')
+             .replace(/epre/gi,'E')
+             .replace(/opro/gi,'O');
+
+        // 3) Hilangkan ES setelah konsonan
+        s = s.replace(/([bcdfghjklmnpqrstvwxyz])es/gi,'$1');
+
+        return s;
+      });
+
+      return conv.join('');
+    });
+
+    return decoded.join('');
+  }
+
+  // ====== UI ======
+  function syncOptionsVisibility(){
+    const decoding = modeUmToId.checked;
+    endOnly.disabled = decoding; strict.disabled = decoding;
+    endOnlyWrap.style.opacity = decoding ? .6 : 1;
+    strictWrap.style.opacity = decoding ? .6 : 1;
+  }
+
+  function update(){
+    const val = src.value;
+    const out = modeUmToId.checked ? decodeUmandana(val) : encodeUmandana(val);
+    dst.value = upper.checked ? out.toUpperCase() : out;
+
+    // counter
+    srcChars.textContent = val.length;
+    srcWords.textContent = (val.trim()? val.trim().split(/\s+/).length : 0);
+    dstChars.textContent = dst.value.length;
+
+    // animasi
+    dst.classList.remove('bubble'); void dst.offsetWidth; dst.classList.add('bubble');
+  }
+
+  // Events
+  src.addEventListener('input', update);
+  endOnly.addEventListener('change', update);
+  strict.addEventListener('change', ()=>{ if(strict.checked) endOnly.checked=false; update(); });
+  upper.addEventListener('change', update);
+  modeIdToUm.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
+  modeUmToId.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
+
+  clearBtn.addEventListener('click', ()=>{ src.value=''; update(); src.focus(); });
+  copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(dst.value); alert('Hasil disalin!'); } catch(e){ alert('Gagal menyalin: '+e.message); }});
+  shareBtn.addEventListener('click', async ()=>{
+    const text = dst.value || '';
+    if(navigator.share){ try{ await navigator.share({title:'Umandana',text}); } catch(e){} }
+    else { alert('Peramban belum mendukung tombol Bagikan. Silakan salin teks.'); }
+  });
+  downloadBtn.addEventListener('click', ()=>{
+    const blob = new Blob([dst.value], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'umandana.txt'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Dialog contoh
+  document.getElementById('how').addEventListener('click', (e)=>{
+    e.preventDefault();
+    const contoh = [
+      ['RUMAH','RUPRU MAHES'],
+      ['ASING','AIDEN SIPRI STRENG'],
+      ['MATA','MAIDEN TAIDEN'],
+      ['BOLA','BOPRO LAIDEN'],
+      ['DUNIA','DUPRU NIPRI AIDEN']
+    ].map(([a,b])=>`• ${a} → ${b}`).join('\n');
+    alert('Contoh:\n'+contoh+'\n\nAturan:\nA→AIDEN\nI→IPRI\nU→UPRU\nE→EPRE\nO→OPRO\nNG→STRENG\nKonsonan +ES');
+  });
+
+  // Seed demo
+  src.value = 'KITA PERGI MAKAN DI RUMAH TEMAN MALAM INI';
+  syncOptionsVisibility();
+  update();
+})();
+</script>
+</body>
+</html>
