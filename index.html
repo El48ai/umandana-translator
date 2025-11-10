@@ -1,9 +1,9 @@
 <script>
 (function(){
   // Tahun otomatis
-  document.getElementById('year').textContent = new Date().getFullYear();
+  const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
 
-  const el = (id) => document.getElementById(id);
+  const el = (id)=>document.getElementById(id);
   const src = el('src'), dst = el('dst');
   const copyBtn = el('copyBtn'), clearBtn = el('clearBtn'), shareBtn = el('shareBtn'), downloadBtn = el('downloadBtn');
   const endOnly = el('endOnly'), strict = el('strict'), upper = el('upper');
@@ -11,158 +11,169 @@
   const modeIdToUm = el('modeIdToUm'), modeUmToId = el('modeUmToId');
   const endOnlyWrap = el('endOnlyWrap'), strictWrap = el('strictWrap');
 
-  console.log("Script loaded"); // Debug: Cek apakah script jalan
+  function isLetter(ch){ return /[A-Za-z]/.test(ch); }
+  function isVowel(ch){ return /[AEIOUaeiou]/.test(ch); }
 
-  // Debounce function
-  function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  }
-
-  function isLetter(ch) { return /[A-Za-z]/.test(ch); }
-  function isVowel(ch) { return /[AEIOUaeiou]/.test(ch); }
-
-  // Vokal map
+  // Aturan vokal terbaru (A → AIDEN)
   const vokalMap = {
-    A: 'AIDEN', a: 'aiden',
-    I: 'IPRI', i: 'ipri',
-    U: 'UPRU', u: 'upru',
-    E: 'EPRE', e: 'epre',
-    O: 'OPRO', o: 'opro'
+    A:'AIDEN', a:'aiden',
+    I:'IPRI',  i:'ipri',
+    U:'UPRU',  u:'upru',
+    E:'EPRE',  e:'epre',
+    O:'OPRO',  o:'opro'
   };
 
-  function plusEs(ch, up) {
+  function plusEs(ch, up){
     const base = up ? ch.toUpperCase() : ch.toLowerCase();
     return base + (up ? 'ES' : 'es');
   }
 
-  // ENCODE: Indonesia → Umandana
-  function encodeUmandana(input) {
-    if (!input?.trim()) return '';
+  // ENCODE: Indonesia → Umandana  (per huruf, deteksi 'ng')
+  function encodeUmandana(input){
+    if(!input) return '';
     const up = upper.checked;
-    const useEndOnly = endOnly.checked && !strict.checked;
+    const useEndOnly = endOnly && endOnly.checked && !(strict && strict.checked);
 
-    let out = input;
-    // Replace NG first
-    out = out.replace(/\bN(?=G)\w*/gi, (match) => {
-      return match.startsWith('NG') ? (up ? 'STRENG' : 'streng') : match;
+    const tokens = input.split(/(\s+)/); // pertahankan spasi
+    const out = tokens.map(tok=>{
+      if (/^\s+$/.test(tok)) return tok;
+
+      const parts = tok.match(/[A-Za-z]+|[^A-Za-z]+/g) || [tok];
+      const conv = parts.map(part=>{
+        if(!/[A-Za-z]/.test(part)) return part;
+
+        let res = '';
+        const L = part.split('');
+        for(let i=0;i<L.length;i++){
+          const ch = L[i], next = L[i+1] || '';
+
+          // NG -> STRENG (case-insensitive)
+          if( (ch==='N'||ch==='n') && (next==='G'||next==='g') ){
+            res += up ? 'STRENG' : 'streng';
+            i++; // skip G
+            continue;
+          }
+
+          // Vokal
+          if(isVowel(ch)){
+            res += vokalMap[ch] ?? ch;
+            continue;
+          }
+
+          // Konsonan
+          if(isLetter(ch)){
+            if(strict && strict.checked){
+              res += plusEs(ch, up);
+            }else{
+              res += up ? ch.toUpperCase() : ch.toLowerCase();
+            }
+            continue;
+          }
+
+          res += ch;
+        }
+
+        // ES di konsonan akhir kata (mode endOnly)
+        if(useEndOnly){
+          const lastAlpha = (part.match(/[A-Za-z](?=[^A-Za-z]*$)/)||[''])[0];
+          if(lastAlpha && !isVowel(lastAlpha)){
+            const endsWithStreng = res.endsWith(up?'STRENG':'streng');
+            if(!endsWithStreng) res += up ? 'ES' : 'es';
+          }
+        }
+        return res;
+      });
+
+      return conv.join('');
     });
-    // Replace vowels
-    Object.keys(vokalMap).forEach(v => {
-      const rep = vokalMap[v];
-      out = out.replace(new RegExp(`\\b${v}\\b`, 'gi'), rep);
-    });
 
-    // Handle consonants with ES
-    if (strict.checked) {
-      out = out.replace(/[bcdfghjklmnpqrstvwxyz]/gi, ch => plusEs(ch, up));
-    } else if (useEndOnly) {
-      out = out.replace(/\b([bcdfghjklmnpqrstvwxyz])(?=[^A-Za-z]*$)/gi, ch => ch + (up ? 'ES' : 'es'));
-    }
-
-    return out;
+    return out.join('');
   }
 
-  // DECODE: Umandana → Indonesia
-  function decodeUmandana(input) {
-    if (!input?.trim()) return '';
-    let out = input;
-    // Decode STRENG to NG
-    out = out.replace(/\bstreng/gi, 'NG');
-    // Decode vowels
-    Object.keys(vokalMap).forEach(v => {
-      const rep = vokalMap[v].toLowerCase();
-      out = out.replace(new RegExp(`\\b${rep}\\b`, 'gi'), v);
+  // DECODE: Umandana → Indonesia (kembalikan pola khas)
+  function decodeUmandana(input){
+    if(!input) return '';
+
+    const tokens = input.split(/(\s+)/);
+    const out = tokens.map(tok=>{
+      if(/^\s+$/.test(tok)) return tok;
+
+      const parts = tok.match(/[A-Za-z]+|[^A-Za-z]+/g) || [tok];
+      const conv = parts.map(part=>{
+        if(!/[A-Za-z]/.test(part)) return part;
+
+        let s = part;
+
+        // 1) STRENG -> NG
+        s = s.replace(/streng/gi,'NG');
+
+        // 2) Vokal (urutkan yang unik/panjang dulu)
+        s = s.replace(/aiden/gi,'A')
+             .replace(/ipri/gi,'I')
+             .replace(/upru/gi,'U')
+             .replace(/epre/gi,'E')
+             .replace(/opro/gi,'O');
+
+        // 3) Hilangkan ES setelah konsonan
+        s = s.replace(/([bcdfghjklmnpqrstvwxyz])es/gi,'$1');
+
+        return s;
+      });
+
+      return conv.join('');
     });
-    // Remove ES from consonants
-    out = out.replace(/([bcdfghjklmnpqrstvwxyz])es/gi, '$1');
-    return out;
+
+    return out.join('');
   }
 
-  function syncOptionsVisibility() {
-    const decoding = modeUmToId.checked;
-    endOnly.disabled = decoding; strict.disabled = decoding;
-    endOnlyWrap.style.opacity = decoding ? 0.6 : 1;
-    strictWrap.style.opacity = decoding ? 0.6 : 1;
-    console.log("Mode:", decoding ? "Umandana → Indonesia" : "Indonesia → Umandana"); // Debug mode
+  function syncOptionsVisibility(){
+    const decoding = modeUmToId && modeUmToId.checked;
+    if(endOnly){ endOnly.disabled = decoding; endOnlyWrap && (endOnlyWrap.style.opacity = decoding?0.6:1); }
+    if(strict){ strict.disabled  = decoding; strictWrap  && (strictWrap.style.opacity  = decoding?0.6:1); }
   }
 
-  function update() {
-    const val = src.value;
-    if (!val.trim()) {
-      dst.value = ''; dstChars.textContent = '0';
-      alert('Input kosong! Tulis sesuatu dulu.'); return;
-    }
-    const out = modeUmToId.checked ? decodeUmandana(val) : encodeUmandana(val);
-    dst.value = upper.checked ? out.toUpperCase() : out;
-    console.log("Processing:", val, "→", out); // Debug output
+  function update(){
+    const val = src.value || '';
+    const out = (modeUmToId && modeUmToId.checked) ? decodeUmandana(val) : encodeUmandana(val);
+    dst.value = (upper && upper.checked) ? out.toUpperCase() : out;
 
-    // Counter
-    srcChars.textContent = val.length;
-    srcWords.textContent = val.trim().split(/\s+/).filter(w => w).length;
-    dstChars.textContent = dst.value.length;
+    // counter
+    srcChars && (srcChars.textContent = String(val.length));
+    srcWords && (srcWords.textContent = val.trim()? String(val.trim().split(/\s+/).length) : '0');
+    dstChars && (dstChars.textContent = String(dst.value.length));
 
-    // Animation
+    // efek kecil
     dst.classList.remove('bubble'); void dst.offsetWidth; dst.classList.add('bubble');
   }
 
-  // Debounced update
-  const debouncedUpdate = debounce(update, 300);
-  src.addEventListener('input', debouncedUpdate);
-  endOnly.addEventListener('change', update);
-  strict.addEventListener('change', () => { if (strict.checked) endOnly.checked = false; update(); });
-  upper.addEventListener('change', update);
-  modeIdToUm.addEventListener('change', () => { syncOptionsVisibility(); update(); });
-  modeUmToId.addEventListener('change', () => { syncOptionsVisibility(); update(); });
+  // events
+  src.addEventListener('input', update);
+  if(endOnly) endOnly.addEventListener('change', update);
+  if(strict)  strict.addEventListener('change', ()=>{ if(strict.checked) endOnly.checked=false; update(); });
+  if(upper)   upper.addEventListener('change', update);
+  if(modeIdToUm) modeIdToUm.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
+  if(modeUmToId) modeUmToId.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
 
-  clearBtn.addEventListener('click', () => { src.value = ''; update(); src.focus(); });
-  copyBtn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(dst.value); alert('Hasil disalin!'); }
-    catch (e) { alert('Gagal menyalin: ' + e.message); }
-  });
-  shareBtn.addEventListener('click', async () => {
-    const text = dst.value || '';
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Umandana', text }); }
-      catch (e) { alert('Gagal membagikan: ' + e.message); }
-    } else { alert('Peramban belum mendukung tombol Bagikan. Silakan salin teks.'); }
-  });
-  downloadBtn.addEventListener('click', () => {
-    const blob = new Blob([dst.value], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'umandana.txt'; a.click();
-    URL.revokeObjectURL(url);
-  });
+  clearBtn.addEventListener('click', ()=>{ src.value=''; update(); src.focus(); });
+  copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(dst.value); alert('Hasil disalin!'); } catch(e){ alert('Gagal menyalin: '+e.message); }});
+  shareBtn.addEventListener('click', async ()=>{ const text = dst.value || ''; if(navigator.share){ try{ await navigator.share({title:'Umandana',text}); } catch(e){} } else { alert('Peramban belum mendukung tombol Bagikan. Silakan salin teks.'); }});
+  downloadBtn.addEventListener('click', ()=>{ const blob = new Blob([dst.value], {type:'text/plain;charset=utf-8'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'umandana.txt'; a.click(); URL.revokeObjectURL(url); });
 
-  // Dialog contoh
-  how.addEventListener('click', (e) => {
+  if(how) how.addEventListener('click', (e)=>{
     e.preventDefault();
     const contoh = [
-      ['RUMAH', 'RUPRU MAHES'], ['ASING', 'AIDEN SIPRI STRENG'],
-      ['MATA', 'MAIDEN TAIDEN'], ['BOLA', 'BOPRO LAIDEN'],
-      ['DUNIA', 'DUPRU NIPRI AIDEN']
-    ].map(([a, b]) => `• ${a} → ${b}`).join('\n');
-    alert('Contoh:\n' + contoh + '\n\nAturan:\nA→AIDEN\nI→IPRI\nU→UPRU\nE→EPRE\nO→OPRO\nNG→STRENG\nKonsonan +ES');
+      ['RUMAH','RUPRU MAHES'],
+      ['ASING','AIDEN SIPRI STRENG'],
+      ['MATA','MAIDEN TAIDEN'],
+      ['BOLA','BOPRO LAIDEN'],
+      ['DUNIA','DUPRU NIPRI AIDEN']
+    ].map(([a,b])=>`• ${a} → ${b}`).join('\n');
+    alert('Contoh:\n'+contoh+'\n\nAturan:\nA→AIDEN\nI→IPRI\nU→UPRU\nE→EPRE\nO→OPRO\nNG→STRENG\nKonsonan +ES');
   });
 
-  // History
-  function saveHistory(text) {
-    let history = JSON.parse(localStorage.getItem('umandanaHistory') || '[]');
-    history.unshift(text); history = history.slice(0, 5);
-    localStorage.setItem('umandanaHistory', JSON.stringify(history));
-  }
-  src.addEventListener('input', () => saveHistory(src.value));
-
-  // Ensure default mode on load
-  modeIdToUm.checked = true; // Force default to Indonesia → Umandana
-  syncOptionsVisibility();
-  update();
-
-  // Seed demo
+  // seed demo (set dulu baru update)
   src.value = 'KITA PERGI MAKAN DI RUMAH TEMAN MALAM INI';
+  syncOptionsVisibility();
   update();
 })();
 </script>
