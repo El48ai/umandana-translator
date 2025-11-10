@@ -1,7 +1,98 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Umandana Translator — Dua Arah</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--muted:#9ca3af;--text:#e5e7eb;--brand:#6366f1;--brand2:#22c55e}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,rgba(99,102,241,.25),transparent),radial-gradient(900px 500px at 10% 10%,rgba(34,197,94,.2),transparent),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    .wrap{max-width:1000px;margin:24px auto;padding:16px}
+    .title{font-size:clamp(24px,2.8vw,36px);font-weight:800;letter-spacing:.2px;text-align:center;margin:8px 0 18px}
+    .subtitle{color:var(--muted);text-align:center;margin-top:-6px;margin-bottom:18px}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr;}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);backdrop-filter: blur(8px);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+    .card h3{margin:0 0 8px;font-size:15px;color:#cbd5e1}
+    .card .body{padding:14px}
+    textarea{width:100%;min-height:220px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:var(--text);padding:12px;outline:none}
+    textarea:focus{border-color:rgba(99,102,241,.7);box-shadow:0 0 0 3px rgba(99,102,241,.25)}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:#eef1f7;padding:10px 14px;border-radius:12px;cursor:pointer}
+    .btn:hover{border-color:rgba(255,255,255,.25)}
+    .btn.primary{background:linear-gradient(135deg,var(--brand),#8b5cf6);border-color:transparent}
+    .btn.success{background:linear-gradient(135deg,var(--brand2),#16a34a);border-color:transparent}
+    .muted{color:var(--muted);font-size:13px}
+    .opt{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0b1020;border:1px solid rgba(255,255,255,.08);border-radius:12px}
+    .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px dashed rgba(255,255,255,.2);color:#cbd5e1}
+    .bubble{animation:pop .5s ease forwards;display:inline-block}
+    @keyframes pop{from{transform:translateY(6px) scale(.98);opacity:.0} to{transform:translateY(0) scale(1);opacity:1}}
+    .footer{opacity:.7;text-align:center;font-size:12px;margin:18px 0}
+    a{color:#c7d2fe}
+    .opts{display:grid;grid-template-columns:1fr;gap:8px}
+    @media(min-width:820px){.opts{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">Umandana Translator</div>
+    <div class="subtitle">Aplikasi ini di buat karena keluarga muthe jkt48 bicara ngomong bahasa umandana yg bikin olla jkt48 bingung nah ku buatlah ini biar olla gak di gibah muthe dan emak nya.</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="body">
+          <h3>Teks Asli</h3>
+          <textarea id="src" placeholder="Tulis teks di sini…"></textarea>
+          <div class="row" style="margin-top:8px">
+            <button type="button" class="btn" id="clearBtn">Bersihkan</button>
+            <span class="badge">Karakter: <span id="srcChars">0</span></span>
+            <span class="badge">Kata: <span id="srcWords">0</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="body">
+          <h3>Hasil</h3>
+          <textarea id="dst" readonly></textarea>
+          <div class="row" style="margin-top:8px">
+            <button type="button" class="btn primary" id="copyBtn">Salin</button>
+            <button type="button" class="btn" id="shareBtn">Bagikan</button>
+            <button type="button" class="btn success" id="downloadBtn">Unduh .txt</button>
+            <span class="badge">Karakter: <span id="dstChars">0</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="body">
+        <div class="opts">
+          <!-- MODE -->
+          <label class="opt"><input type="radio" name="mode" id="modeIdToUm" checked> Indonesia → Umandana</label>
+          <label class="opt"><input type="radio" name="mode" id="modeUmToId"> Umandana → Indonesia</label>
+
+          <!-- OPSI ENCODE -->
+          <label class="opt" id="endOnlyWrap"><input type="checkbox" id="endOnly" checked> ES hanya di <b>konsonan akhir kata</b></label>
+          <label class="opt" id="strictWrap"><input type="checkbox" id="strict"> Mode ketat: <b>semua konsonan +ES</b></label>
+
+          <!-- OUTPUT STYLE -->
+          <label class="opt"><input type="checkbox" id="upper" checked> Hasil <b>huruf besar</b></label>
+        </div>
+        <div class="muted" style="margin-top:8px">
+          Aturan dasar: A→AIDEN, I→IPRI, U→UPRU, E→EPRE, O→OPRO, NG→STRENG, konsonan +ES.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">© <span id="year"></span> — Umandana Translator. Dibuat oleh El Padri. <a href="#" id="how">Lihat contoh</a></div>
+  </div>
+
 <script>
 (function(){
-  // Tahun otomatis
-  const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+  // tahun otomatis
+  document.getElementById('year').textContent = new Date().getFullYear();
 
   const el = (id)=>document.getElementById(id);
   const src = el('src'), dst = el('dst');
@@ -14,89 +105,87 @@
   function isLetter(ch){ return /[A-Za-z]/.test(ch); }
   function isVowel(ch){ return /[AEIOUaeiou]/.test(ch); }
 
-  // Aturan vokal terbaru (A → AIDEN)
+  // Vokal: sesuai aturan terbaru (A → AIDEN)
   const vokalMap = {
-    A:'AIDEN', a:'aiden',
-    I:'IPRI',  i:'ipri',
-    U:'UPRU',  u:'upru',
-    E:'EPRE',  e:'epre',
-    O:'OPRO',  o:'opro'
+    A: 'AIDEN', a:'aiden',
+    I: 'IPRI',  i:'ipri',
+    U: 'UPRU',  u:'upru',
+    E: 'EPRE',  e:'epre',
+    O: 'OPRO',  o:'opro'
   };
 
   function plusEs(ch, up){
     const base = up ? ch.toUpperCase() : ch.toLowerCase();
-    return base + (up ? 'ES' : 'es');
+    return base + (up ? 'ES':'es');
   }
 
-  // ENCODE: Indonesia → Umandana  (per huruf, deteksi 'ng')
+  // ENCODE: Indonesia → Umandana
   function encodeUmandana(input){
     if(!input) return '';
     const up = upper.checked;
-    const useEndOnly = endOnly && endOnly.checked && !(strict && strict.checked);
+    const useEndOnly = endOnly.checked && !strict.checked;
 
-    const tokens = input.split(/(\s+)/); // pertahankan spasi
-    const out = tokens.map(tok=>{
-      if (/^\s+$/.test(tok)) return tok;
+    const words = input.split(/(\\s+)/); // pertahankan spasi
+    const converted = words.map(token=>{
+      if(/^\\s+$/.test(token)) return token; // spasi
 
-      const parts = tok.match(/[A-Za-z]+|[^A-Za-z]+/g) || [tok];
-      const conv = parts.map(part=>{
-        if(!/[A-Za-z]/.test(part)) return part;
+      const parts = token.match(/[A-Za-z]+|[^A-Za-z]+/g) || [token];
+      const convParts = parts.map(part=>{
+        if(!/[A-Za-z]/.test(part)) return part; // tanda baca tetap
+        let out='';
+        const letters = part.split('');
+        for(let i=0;i<letters.length;i++){
+          const ch = letters[i];
+          const next = letters[i+1]||'';
 
-        let res = '';
-        const L = part.split('');
-        for(let i=0;i<L.length;i++){
-          const ch = L[i], next = L[i+1] || '';
-
-          // NG -> STRENG (case-insensitive)
-          if( (ch==='N'||ch==='n') && (next==='G'||next==='g') ){
-            res += up ? 'STRENG' : 'streng';
+          // NG → STRENG (semua posisi)
+          if((ch==='N'||ch==='n') && (next==='G'||next==='g')){
+            out += up ? 'STRENG':'streng';
             i++; // skip G
             continue;
           }
 
           // Vokal
           if(isVowel(ch)){
-            res += vokalMap[ch] ?? ch;
+            out += vokalMap[ch] ?? ch;
             continue;
           }
 
           // Konsonan
           if(isLetter(ch)){
-            if(strict && strict.checked){
-              res += plusEs(ch, up);
-            }else{
-              res += up ? ch.toUpperCase() : ch.toLowerCase();
+            if(strict.checked){
+              out += plusEs(ch, up);
+            } else {
+              out += up ? ch.toUpperCase() : ch.toLowerCase();
             }
             continue;
           }
 
-          res += ch;
+          out += ch;
         }
 
-        // ES di konsonan akhir kata (mode endOnly)
         if(useEndOnly){
           const lastAlpha = (part.match(/[A-Za-z](?=[^A-Za-z]*$)/)||[''])[0];
           if(lastAlpha && !isVowel(lastAlpha)){
-            const endsWithStreng = res.endsWith(up?'STRENG':'streng');
-            if(!endsWithStreng) res += up ? 'ES' : 'es';
+            const endsWithStreng = out.endsWith(up?'STRENG':'streng');
+            if(!endsWithStreng) out += up?'ES':'es';
           }
         }
-        return res;
+        return out;
       });
-
-      return conv.join('');
+      return convParts.join('');
     });
 
-    return out.join('');
+    return converted.join('');
   }
 
-  // DECODE: Umandana → Indonesia (kembalikan pola khas)
+  // DECODE: Umandana → Indonesia
   function decodeUmandana(input){
     if(!input) return '';
 
-    const tokens = input.split(/(\s+)/);
-    const out = tokens.map(tok=>{
-      if(/^\s+$/.test(tok)) return tok;
+    const tokens = input.split(/(\\s+)/);
+    const decoded = tokens.map(tok=>{
+      if(/^\\s+$/.test(tok)) return tok;
 
       const parts = tok.match(/[A-Za-z]+|[^A-Za-z]+/g) || [tok];
       const conv = parts.map(part=>{
@@ -104,7 +193,7 @@
 
         let s = part;
 
-        // 1) STRENG -> NG
+        // 1) STRENG -> NG (case-insensitive)
         s = s.replace(/streng/gi,'NG');
 
         // 2) Vokal (urutkan yang unik/panjang dulu)
@@ -123,43 +212,46 @@
       return conv.join('');
     });
 
-    return out.join('');
+    return decoded.join('');
   }
 
   function syncOptionsVisibility(){
-    const decoding = modeUmToId && modeUmToId.checked;
-    if(endOnly){ endOnly.disabled = decoding; endOnlyWrap && (endOnlyWrap.style.opacity = decoding?0.6:1); }
-    if(strict){ strict.disabled  = decoding; strictWrap  && (strictWrap.style.opacity  = decoding?0.6:1); }
+    const decoding = modeUmToId.checked;
+    // Saat DECODE, opsi encode dinonaktifkan agar tidak membingungkan
+    endOnly.disabled = decoding; strict.disabled = decoding;
+    endOnlyWrap.style.opacity = decoding ? .6 : 1;
+    strictWrap.style.opacity = decoding ? .6 : 1;
   }
 
   function update(){
-    const val = src.value || '';
-    const out = (modeUmToId && modeUmToId.checked) ? decodeUmandana(val) : encodeUmandana(val);
-    dst.value = (upper && upper.checked) ? out.toUpperCase() : out;
+    const val = src.value;
+    const out = modeUmToId.checked ? decodeUmandana(val) : encodeUmandana(val);
+    dst.value = upper.checked ? out.toUpperCase() : out;
 
     // counter
-    srcChars && (srcChars.textContent = String(val.length));
-    srcWords && (srcWords.textContent = val.trim()? String(val.trim().split(/\s+/).length) : '0');
-    dstChars && (dstChars.textContent = String(dst.value.length));
+    srcChars.textContent = val.length;
+    srcWords.textContent = (val.trim()? val.trim().split(/\\s+/).length : 0);
+    dstChars.textContent = dst.value.length;
 
-    // efek kecil
+    // animasi
     dst.classList.remove('bubble'); void dst.offsetWidth; dst.classList.add('bubble');
   }
 
-  // events
+  // Events
   src.addEventListener('input', update);
-  if(endOnly) endOnly.addEventListener('change', update);
-  if(strict)  strict.addEventListener('change', ()=>{ if(strict.checked) endOnly.checked=false; update(); });
-  if(upper)   upper.addEventListener('change', update);
-  if(modeIdToUm) modeIdToUm.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
-  if(modeUmToId) modeUmToId.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
+  endOnly.addEventListener('change', update);
+  strict.addEventListener('change', ()=>{ if(strict.checked) endOnly.checked=false; update(); });
+  upper.addEventListener('change', update);
+  modeIdToUm.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
+  modeUmToId.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
 
   clearBtn.addEventListener('click', ()=>{ src.value=''; update(); src.focus(); });
   copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(dst.value); alert('Hasil disalin!'); } catch(e){ alert('Gagal menyalin: '+e.message); }});
   shareBtn.addEventListener('click', async ()=>{ const text = dst.value || ''; if(navigator.share){ try{ await navigator.share({title:'Umandana',text}); } catch(e){} } else { alert('Peramban belum mendukung tombol Bagikan. Silakan salin teks.'); }});
   downloadBtn.addEventListener('click', ()=>{ const blob = new Blob([dst.value], {type:'text/plain;charset=utf-8'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'umandana.txt'; a.click(); URL.revokeObjectURL(url); });
 
-  if(how) how.addEventListener('click', (e)=>{
+  // Dialog contoh
+  document.getElementById('how').addEventListener('click', (e)=>{
     e.preventDefault();
     const contoh = [
       ['RUMAH','RUPRU MAHES'],
@@ -167,13 +259,15 @@
       ['MATA','MAIDEN TAIDEN'],
       ['BOLA','BOPRO LAIDEN'],
       ['DUNIA','DUPRU NIPRI AIDEN']
-    ].map(([a,b])=>`• ${a} → ${b}`).join('\n');
-    alert('Contoh:\n'+contoh+'\n\nAturan:\nA→AIDEN\nI→IPRI\nU→UPRU\nE→EPRE\nO→OPRO\nNG→STRENG\nKonsonan +ES');
+    ].map(([a,b])=>`• ${a} → ${b}`).join('\\n');
+    alert('Contoh:\\n'+contoh+'\\n\\nAturan:\\nA→AIDEN\\nI→IPRI\\nU→UPRU\\nE→EPRE\\nO→OPRO\\nNG→STRENG\\nKonsonan +ES');
   });
 
-  // seed demo (set dulu baru update)
+  // seed demo
   src.value = 'KITA PERGI MAKAN DI RUMAH TEMAN MALAM INI';
   syncOptionsVisibility();
   update();
 })();
 </script>
+</body>
+</html>
