@@ -121,6 +121,54 @@
       font-weight:700;font-size:80px;line-height:1.6;letter-spacing:.2em;
       white-space:pre;text-align:center;
     }
+
+    /* ===== Tema Hari Pahlawan (10 November) ===== */
+    body[data-theme="pahlawan"]{
+      /* Palet merah–putih + aksen emas */
+      --bg:#8b0000;          /* merah tua latar */
+      --card:#9f1c1c;        /* panel merah lebih terang */
+      --muted:#ffe3e3;       /* teks sekunder */
+      --text:#fffaf5;        /* teks utama */
+      --brand:#ffd166;       /* aksen emas hangat */
+      --brand2:#22c55e;      /* tombol hijau tetap */
+      --surface:rgba(255,255,255,.10);
+      --border:rgba(255,255,255,.35);
+      --border-hover:#fff;
+
+      /* Latar: merah–putih diagonal halus + glow emas */
+      background:
+        radial-gradient(900px 500px at 80% -10%, rgba(255,209,102,.22), transparent),
+        radial-gradient(1000px 560px at 10% 0%, rgba(255,255,255,.18), transparent),
+        repeating-linear-gradient(135deg,
+          rgba(255,255,255,.12) 0px, rgba(255,255,255,.12) 8px,
+          rgba(139,0,0,.08) 8px,   rgba(139,0,0,.08) 16px),
+        var(--bg);
+    }
+    /* Kartu & judul sedikit “heroic” */
+    body[data-theme="pahlawan"] .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      border-color:rgba(255,255,255,.45);
+      box-shadow:0 10px 36px rgba(0,0,0,.45), 0 0 40px rgba(255,209,102,.15);
+    }
+    body[data-theme="pahlawan"] .title{
+      color:#fff;
+      text-shadow:0 0 6px #fff, 0 0 22px rgba(255,209,102,.9);
+      letter-spacing:.8px;
+    }
+    /* Badge Hari Pahlawan (hanya muncul saat tema pahlawan) */
+    .hero-badge{display:none;}
+    body[data-theme="pahlawan"] .hero-badge{
+      display:inline-flex;
+      align-items:center; gap:10px;
+      background:linear-gradient(90deg,#d32d2d,#ffffff);
+      color:#8b0000; font-weight:800;
+      padding:8px 14px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.6);
+      box-shadow:0 6px 20px rgba(0,0,0,.35), inset 0 0 18px rgba(255,255,255,.25);
+    }
+    body[data-theme="pahlawan"] .hero-badge .dot{
+      width:10px;height:10px;border-radius:999px;background:#ffd166;box-shadow:0 0 10px #ffd166;
+    }
   </style>
 </head>
 
@@ -139,12 +187,18 @@
           <option value="sakura">Sakura</option>
           <option value="latte">Latte (terang)</option>
           <option value="jkt48">JKT48 (neon merah)</option>
+          <option value="pahlawan">Hari Pahlawan 🇮🇩</option>
         </select>
         <button type="button" id="randomTheme" class="btn" style="margin-left:8px">Acak</button>
         <label class="badge" style="margin-left:8px;cursor:pointer">
           <input type="checkbox" id="autoRotate"> Rotasi 2 menit
         </label>
       </label>
+    </div>
+
+    <!-- Badge khusus tema Pahlawan -->
+    <div class="row" style="justify-content:center;margin:-4px 0 10px">
+      <div class="hero-badge"><span class="dot"></span> Hari Pahlawan 10 November <span class="dot"></span></div>
     </div>
 
     <div class="subtitle">
@@ -214,13 +268,16 @@
 
   // ====== Tema ======
   const themeSel = el('themeSel'), randomThemeBtn = el('randomTheme'), autoRotate = el('autoRotate');
-  const THEMES = ['neon','ocean','sakura','latte','jkt48'];
+  const THEMES = ['neon','ocean','sakura','latte','jkt48','pahlawan'];
 
   function applyTheme(name){
     document.body.setAttribute('data-theme', name);
     localStorage.setItem('umandana-theme', name);
   }
-  const savedTheme = localStorage.getItem('umandana-theme') || document.body.getAttribute('data-theme') || 'neon';
+  // Auto-aktifkan tema Pahlawan saat 10 November (user tetap bisa ganti)
+  const today = new Date();
+  const isPahlawanDay = (today.getMonth()===10 && today.getDate()===10); // 0=Jan, 10=Nov
+  const savedTheme = localStorage.getItem('umandana-theme') || (isPahlawanDay ? 'pahlawan' : document.body.getAttribute('data-theme')) || 'neon';
   applyTheme(savedTheme);
   themeSel.value = savedTheme;
 
