@@ -5,41 +5,157 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
   <title>Umandana Translator — Dua Arah</title>
-
-  <!-- NOTE: Untuk CSP yang ketat, set header Content-Security-Policy pada server. -->
-  <!-- contoh meta CSP (lebih baik di-set di header): -->
-  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https://www.gstatic.com 'unsafe-inline';"> -->
-
   <link rel="manifest" href="/manifest.json">
   <style>
-    :root{--bg:#0f172a;--card:#111827;--muted:#9ca3af;--text:#e5e7eb;--brand:#6366f1;--brand2:#22c55e;--surface:#0b1020;--border:rgba(255,255,255,.12);--border-hover:rgba(255,255,255,.25)}
+    :root{
+      --bg:#0f172a; --card:#111827; --muted:#9ca3af; --text:#e5e7eb;
+      --brand:#6366f1; --brand2:#22c55e; --surface:#0b1020;
+      --border:rgba(255,255,255,.12); --border-hover:rgba(255,255,255,.25);
+    }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:
-      radial-gradient(1200px 600px at 70% -10%,rgba(99,102,241,.25),transparent),
-      radial-gradient(900px 500px at 10% 10%,rgba(34,197,94,.2),transparent),
-      var(--bg);
-      color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;overflow-x:hidden}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 70% -10%,rgba(99,102,241,.25),transparent),
+        radial-gradient(900px 500px at 10% 10%,rgba(34,197,94,.2),transparent),
+        var(--bg);
+      color:var(--text);
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+      overflow-x:hidden;
+    }
     .wrap{max-width:1000px;margin:20px auto;padding:14px}
     .title{display:flex;align-items:center;justify-content:center;gap:12px;font-size:clamp(24px,2.8vw,34px);font-weight:800;letter-spacing:.2px;text-align:center;margin:6px 0 12px}
     .subtitle{color:var(--muted);text-align:center;margin-top:-6px;margin-bottom:14px}
-    .grid{display:grid;gap:14px;grid-template-columns:1fr}@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid var(--border);backdrop-filter: blur(8px);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+    .grid{display:grid;gap:14px;grid-template-columns:1fr}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      backdrop-filter: blur(8px);
+      border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.35)
+    }
     .card h3{margin:0 0 8px;font-size:15px;color:#cbd5e1}.card .body{padding:12px}
     textarea{width:100%;min-height:220px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:12px;outline:none;resize:vertical}
     textarea:focus{border-color:rgba(99,102,241,.7);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
     .row{display:flex;gap:8px;flex-wrap:wrap}
     .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--surface);color:#eef1f7;padding:10px 14px;border-radius:10px;cursor:pointer}
     .btn:hover{border-color:var(--border-hover)}.btn.primary{background:linear-gradient(135deg,var(--brand),#8b5cf6);border-color:transparent}.btn.success{background:linear-gradient(135deg,var(--brand2),#16a34a);border-color:transparent}
-    .muted{color:var(--muted);font-size:13px}.opt{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px}.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px dashed var(--border);color:#cbd5e1}.bubble{animation:pop .45s ease forwards;display:inline-block}@keyframes pop{from{transform:translateY(6px) scale(.98);opacity:0} to{transform:translateY(0) scale(1);opacity:1}}.footer{opacity:.8;text-align:center;font-size:12px;margin:14px 0}a{color:#c7d2fe}.opts{display:grid;grid-template-columns:1fr;gap:8px}@media(min-width:820px){.opts{grid-template-columns:1fr 1fr}}
+    .muted{color:var(--muted);font-size:13px}.opt{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px}.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px dashed var(--border);color:#cbd5e1}
+    .bubble{animation:pop .45s ease forwards;display:inline-block}@keyframes pop{from{transform:translateY(6px) scale(.98);opacity:0} to{transform:translateY(0) scale(1);opacity:1}}
+    .footer{opacity:.8;text-align:center;font-size:12px;margin:14px 0}a{color:#c7d2fe}.opts{display:grid;grid-template-columns:1fr;gap:8px}@media(min-width:820px){.opts{grid-template-columns:1fr 1fr}}
+    /* modal / toast */
+    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--card);border-radius:12px;padding:14px;z-index:10010;max-width:520px;box-shadow:0 10px 40px rgba(0,0,0,.5);display:none}
+    .modal.show{display:block}
+    .toast{position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,.7);color:white;padding:10px 14px;border-radius:10px;z-index:10011;display:none}
+    .toast.show{display:block}
+    /* confetti */
+    .confetti{position:fixed;z-index:9999;pointer-events:none;top:0;left:0;width:12px;height:12px;opacity:0.95;transform-origin:center}
 
-    /* modal / toast */ .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--card);border-radius:12px;padding:14px;z-index:10010;max-width:520px;box-shadow:0 10px 40px rgba(0,0,0,.5);display:none} .modal.show{display:block} .toast{position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,.7);color:white;padding:10px 14px;border-radius:10px;z-index:10011;display:none} .toast.show{display:block}
-
-    /* confetti */ .confetti{position:fixed;z-index:9999;pointer-events:none;top:0;left:0;width:12px;height:12px;opacity:0.95;transform-origin:center}
+    /* confetti animation (fix: ditambahkan agar confetti bergerak) */
+    @keyframes confettiFall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity:1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity:0; }
+    }
 
     @media(max-width:520px){.title{font-size:20px}.wrap{margin:12px;padding:12px}}
-    /* small helper for visually-hidden text (accessibility) */
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    /* ======= THEME VARIANTS ======= */
+    /* neon = default (already covered by :root) */
+
+    /* Ocean */
+    body[data-theme="ocean"]{
+      --bg:linear-gradient(180deg,#071125,#0b2740);
+      --card:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --muted:#9bd0e8; --text:#e6f7ff;
+      --brand:#0ea5b7; --brand2:#0369a1;
+      --surface:rgba(255,255,255,0.02);
+      --border:rgba(255,255,255,.06);
+      --border-hover:rgba(255,255,255,.18);
+      background:
+        radial-gradient(900px 480px at 75% -10%, rgba(14,165,183,.06), transparent),
+        radial-gradient(900px 520px at 5% 10%, rgba(3,105,161,.04), transparent),
+        var(--bg);
+    }
+
+    /* Sakura (pink/light) */
+    body[data-theme="sakura"]{
+      --bg:linear-gradient(180deg,#2a1b2f,#3a1f3f);
+      --card:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      --muted:#f6d3e0; --text:#fff5fb;
+      --brand:#f472b6; --brand2:#fb7185;
+      --surface:rgba(255,255,255,.02);
+      --border:rgba(255,255,255,.06);
+      --border-hover:rgba(255,255,255,.18);
+      background:
+        radial-gradient(800px 420px at 70% -10%, rgba(244,114,182,.06), transparent),
+        radial-gradient(700px 380px at 10% 10%, rgba(251,113,133,.04), transparent),
+        var(--bg);
+    }
+
+    /* Latte (light theme) */
+    body[data-theme="latte"]{
+      --bg:linear-gradient(180deg,#fbf7f3,#efe9e1);
+      --card:linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.01));
+      --muted:#6b6b5f; --text:#0b1412;
+      --brand:#b7791f; --brand2:#c084fc;
+      --surface:rgba(0,0,0,.03);
+      --border:rgba(0,0,0,.08);
+      --border-hover:rgba(0,0,0,.18);
+    }
+
+    /* JKT48 neon red style */
+    body[data-theme="jkt48"]{
+      --bg:linear-gradient(180deg,#17060a,#2b0610);
+      --card:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      --muted:#f5c6d1; --text:#ffeef2;
+      --brand:#ef4444; --brand2:#f97316;
+      --surface:rgba(255,255,255,0.02);
+      --border:rgba(255,255,255,.06);
+      --border-hover:rgba(255,255,255,.2);
+      background:
+        radial-gradient(900px 480px at 75% -10%, rgba(239,68,68,.06), transparent),
+        radial-gradient(900px 520px at 5% 10%, rgba(249,115,22,.04), transparent),
+        var(--bg);
+    }
+
+    /* Hari Pahlawan */
+    body[data-theme="pahlawan"]{
+      --bg:linear-gradient(180deg,#0b1220,#10202a);
+      --card:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      --muted:#cfd8df; --text:#f7fbff;
+      --brand:#ef4444; --brand2:#f59e0b;
+      --surface:rgba(255,255,255,0.02);
+      --border:rgba(255,255,255,.06);
+      --border-hover:rgba(255,255,255,.14);
+      background:
+        radial-gradient(900px 480px at 72% -10%, rgba(239,68,68,.06), transparent),
+        radial-gradient(900px 520px at 12% 8%, rgba(245,158,11,.04), transparent),
+        var(--bg);
+    }
+
+    /* Hari Ayah (dark green) */
+    body[data-theme="ayah"]{
+      --bg:linear-gradient(180deg,#0f2b26,#112d2a);
+      --card:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+      --muted:#cfe9de; --text:#f8fff5;
+      --brand:#ffd166; --brand2:#22c55e;
+      --surface:rgba(255,255,255,.03);
+      --border:rgba(255,255,255,.06);
+      --border-hover:rgba(255,255,255,.18);
+      background:
+        radial-gradient(900px 500px at 75% -10%, rgba(255,209,102,.06), transparent),
+        radial-gradient(1000px 560px at 10% 0%, rgba(34,197,94,.06), transparent),
+        linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.18)),
+        var(--bg);
+    }
+
+    /* ensure .card colors adapt slightly by reading var(--card) when needed */
+    body[data-theme] .card{ background: var(--card); border-color: var(--border); }
+    body[data-theme] .btn.primary { background: linear-gradient(135deg, var(--brand), #8b5cf6); }
+    body[data-theme] .btn.success { background: linear-gradient(135deg, var(--brand2), #16a34a); }
+
   </style>
 </head>
 <body data-theme="neon">
@@ -115,7 +231,6 @@
         </div>
         <div class="muted" style="margin-top:8px">Aturan dasar: A→AIDEN, I→IPRI, U→UPRU, E→EPRE, O→OPRO, NG→STRENG, konsonan +ES.</div>
 
-        <!-- Analytics opt-in (privacy) -->
         <div style="margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
           <label class="opt" id="analyticsWrap"><input type="checkbox" id="allowAnalytics"> Izinkan analytics (opsional)</label>
           <div class="muted">Jika diizinkan, data anonim akan dipakai untuk memperbaiki aplikasi.</div>
@@ -130,7 +245,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* ====== UTILS & SMALL HELPERS ====== */
 (function(){
   document.getElementById('year').textContent = new Date().getFullYear();
   const el = id => document.getElementById(id);
@@ -143,26 +257,19 @@
   const themeSel = el('themeSel'), randomThemeBtn = el('randomTheme'), autoRotate = el('autoRotate');
   const allowAnalytics = el('allowAnalytics');
 
-  // Debounce helper (prevent work on every keystroke)
-  function debounce(fn, wait=180){
-    let t=null;
-    return function(...args){ clearTimeout(t); t = setTimeout(()=> fn.apply(this,args), wait); };
-  }
-
-  // Lightweight toasts and modal
+  function debounce(fn, wait=180){ let t=null; return function(...args){ clearTimeout(t); t = setTimeout(()=> fn.apply(this,args), wait); }; }
   function showToast(text, time=2000){ const t = el('toast'); t.textContent = text; t.classList.add('show'); setTimeout(()=> t.classList.remove('show'), time); }
   function showModal(html){ const m = el('modal'); m.innerHTML = html; m.classList.add('show'); m.setAttribute('aria-hidden','false'); const btn = m.querySelector('button'); if(btn) btn.focus(); }
   function hideModal(){ const m = el('modal'); m.classList.remove('show'); m.setAttribute('aria-hidden','true'); }
 
-  // Shortcuts: Ctrl/Cmd+K => focus input, Ctrl/Cmd+Enter => copy result
   window.addEventListener('keydown',(e)=>{
     const meta = e.ctrlKey || e.metaKey;
     if(meta && (e.key === 'k' || e.key === 'K')){ e.preventDefault(); src.focus(); src.select(); }
     if(meta && e.key === 'Enter'){ e.preventDefault(); copyToClipboard(dst.value); showToast('Hasil disalin (shortcut)'); }
   });
 
-  /* ====== Theme + confetti (keamanan: innerHTML hanya statis SVG) ====== */
   const THEMES = ['neon','ocean','sakura','latte','jkt48','pahlawan','ayah'];
+
   function setDoodleSvg(name){
     const d = el('doodlePlace');
     if(!d) return;
@@ -172,35 +279,70 @@
       d.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2c1.7 0 3 1.3 3 3s-1.3 3-3 3-3-1.3-3-3 1.3-3 3-3zM6 20c0-3.3 2.7-6 6-6s6 2.7 6 6H6z" fill="currentColor"/></svg>';
     }
   }
-  function applyTheme(name, {triggerConfetti=false} = {}){ document.body.setAttribute('data-theme', name); localStorage.setItem('umandana-theme', name); setDoodleSvg(name); if(triggerConfetti && name==='ayah') createConfettiBurst(); }
+
+  function applyTheme(name, {triggerConfetti=false} = {}){
+    document.body.setAttribute('data-theme', name);
+    localStorage.setItem('umandana-theme', name);
+    setDoodleSvg(name);
+    // trigger confetti only if requested & theme is ayah
+    if(triggerConfetti && name==='ayah') createConfettiBurst();
+  }
+
   const today = new Date();
   const isAyahDay = (today.getMonth()===10 && today.getDate()===12);
   const savedTheme = localStorage.getItem('umandana-theme') || (isAyahDay ? 'ayah' : 'neon');
   applyTheme(savedTheme);
-  themeSel.value = savedTheme;
-  themeSel.addEventListener('change', e => { applyTheme(e.target.value, {triggerConfetti:true}); });
-  randomThemeBtn.addEventListener('click', ()=> { let pick; do{ pick = THEMES[Math.floor(Math.random()*THEMES.length)]; } while(pick===document.body.getAttribute('data-theme')); themeSel.value = pick; applyTheme(pick,{triggerConfetti:true}); });
-  let rotateTimer=null;
-  function startRotate(){ stopRotate(); rotateTimer = setInterval(()=> randomThemeBtn.click(), 2*60*1000); }
-  function stopRotate(){ if(rotateTimer) { clearInterval(rotateTimer); rotateTimer=null; } }
-  autoRotate.addEventListener('change', (e)=> e.target.checked ? startRotate() : stopRotate());
+  if(themeSel) themeSel.value = savedTheme;
 
-  // confetti (simple)
+  if(themeSel) themeSel.addEventListener('change', (e) => applyTheme(e.target.value, {triggerConfetti:true}));
+  if(randomThemeBtn) randomThemeBtn.addEventListener('click', ()=>{
+    let pick;
+    do{ pick = THEMES[Math.floor(Math.random()*THEMES.length)]; } while(pick === document.body.getAttribute('data-theme'));
+    if(themeSel) themeSel.value = pick;
+    applyTheme(pick, {triggerConfetti:true});
+  });
+
+  let rotateTimer = null;
+  function startRotate(){ stopRotate(); rotateTimer = setInterval(()=> randomThemeBtn.click(), 2*60*1000); }
+  function stopRotate(){ if(rotateTimer){ clearInterval(rotateTimer); rotateTimer = null; } }
+  if(autoRotate) autoRotate.addEventListener('change', (e)=> e.target.checked ? startRotate() : stopRotate());
+
+  // confetti functions
   function rand(min,max){ return Math.random()*(max-min)+min; }
   const COLORS = ['#ffd166','#22c55e','#4ade80','#ff7ab6','#ffd1a9','#a7f3d0','#fff29b'];
   function createConfettiPiece(x, delay){
-    const el = document.createElement('div'); el.className = 'confetti'; const size=Math.floor(rand(8,14)); el.style.width = size+'px'; el.style.height = (size*0.6)+'px'; el.style.left = x+'px'; el.style.top = '-20px'; el.style.background = COLORS[Math.floor(Math.random()*COLORS.length)]; el.style.borderRadius = (Math.random()>0.5 ? '2px' : '50%'); el.style.transform = `rotate(${rand(0,360)}deg)`; const duration = rand(2200,3600); el.style.animation = `confettiFall ${duration}ms cubic-bezier(.2,.8,.2,1) ${delay}ms forwards`; document.body.appendChild(el); setTimeout(()=> { try{ el.remove(); }catch(_){} }, duration+delay+300);
+    const elc = document.createElement('div');
+    elc.className = 'confetti';
+    const size = Math.floor(rand(8,14));
+    elc.style.width = size + 'px';
+    elc.style.height = (size*0.6) + 'px';
+    elc.style.left = x + 'px';
+    elc.style.top = '-20px';
+    elc.style.background = COLORS[Math.floor(Math.random()*COLORS.length)];
+    elc.style.borderRadius = (Math.random()>0.5? '2px' : '50%');
+    elc.style.transform = `rotate(${rand(0,360)}deg)`;
+    const duration = rand(2200,3600);
+    elc.style.animation = `confettiFall ${duration}ms cubic-bezier(.2,.8,.2,1) ${delay}ms forwards`;
+    document.body.appendChild(elc);
+    setTimeout(()=>{ try{ elc.remove(); }catch(e){} }, duration + delay + 400);
   }
-  function createConfettiBurst(){ const count=28; const w = Math.max(document.documentElement.clientWidth||0, window.innerWidth||0); for(let i=0;i<count;i++){ const x = rand(20,w-20); const delay = Math.floor(rand(0,280)); createConfettiPiece(x, delay); } setTimeout(()=>{ for(let i=0;i<10;i++){ createConfettiPiece((w/2)+rand(-120,120), 120+Math.floor(rand(0,200))); } }, 350); }
-  if(savedTheme==='ayah' || isAyahDay) setTimeout(()=> createConfettiBurst(), 500);
+  function createConfettiBurst(){
+    const count = 28;
+    const w = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    for(let i=0;i<count;i++){
+      createConfettiPiece(rand(20, w-20), Math.floor(rand(0,280)));
+    }
+    setTimeout(()=> {
+      for(let i=0;i<10;i++) createConfettiPiece((w/2)+rand(-120,120), 120+Math.floor(rand(0,200)));
+    }, 350);
+  }
+  if(savedTheme === 'ayah' || isAyahDay) setTimeout(()=> createConfettiBurst(), 500);
 
-  /* ====== Text transformation logic (encode/decode) ====== */
+  // === translator logic (sama seperti sebelum) ===
   function isLetter(ch){ return /[A-Za-z]/.test(ch); }
   function isVowel(ch){ return /[AEIOUaeiou]/.test(ch); }
-
   const vokalMap = { A:'AIDEN', a:'aiden', I:'IPRI', i:'ipri', U:'UPRU', u:'upru', E:'EPRE', e:'epre', O:'OPRO', o:'opro' };
   function plusEs(ch, up){ const base = up ? ch.toUpperCase() : ch.toLowerCase(); return base + (up ? 'ES' : 'es'); }
-
   function matchCase(replacement, example){
     if(!example) return replacement;
     if(example.toUpperCase() === example) return replacement.toUpperCase();
@@ -265,10 +407,9 @@
     return decoded.join('');
   }
 
-  /* ====== UI sync & events ====== */
   function syncOptionsVisibility(){ const decoding = modeUmToId.checked; endOnly.disabled = decoding; strict.disabled = decoding; endOnlyWrap.style.opacity = decoding ? .6 : 1; strictWrap.style.opacity = decoding ? .6 : 1; }
 
-  function compute(){ // actual compute function (no uppercasing inside)
+  function compute(){
     const val = src.value;
     const outRaw = modeUmToId.checked ? decodeUmandana(val) : encodeUmandana(val);
     const out = upper.checked ? outRaw.toUpperCase() : outRaw;
@@ -282,11 +423,7 @@
 
   const update = debounce(()=>{ compute(); }, 140);
 
-  src.addEventListener('input', ()=>{
-    const long = src.value.length > 2000;
-    if(long) el('processingStatus').textContent = 'Memproses teks panjang...';
-    update();
-  });
+  src.addEventListener('input', ()=>{ const long = src.value.length > 2000; if(long) el('processingStatus').textContent = 'Memproses teks panjang...'; update(); });
   endOnly.addEventListener('change', update);
   strict.addEventListener('change', ()=>{ if(strict.checked) endOnly.checked=false; update(); });
   upper.addEventListener('change', update);
@@ -294,19 +431,12 @@
   modeUmToId.addEventListener('change', ()=>{ syncOptionsVisibility(); update(); });
   clearBtn.addEventListener('click', ()=>{ src.value=''; update(); src.focus(); });
 
-  // copy fallback
   async function copyToClipboard(text){
     try{ await navigator.clipboard.writeText(text); showToast('Hasil disalin!'); }
     catch(e){ const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); showToast('Hasil disalin (fallback)'); } catch(_){ showToast('Gagal menyalin, silakan salin manual'); } ta.remove(); }
   }
   copyBtn.addEventListener('click', async ()=>{ await copyToClipboard(dst.value); });
-
-  shareBtn.addEventListener('click', async ()=>{
-    const text = dst.value || '';
-    if(navigator.share){ try{ await navigator.share({title:'Umandana', text}); } catch(e){} }
-    else { showModal('<strong>Bagikan</strong><p>Peramban tidak mendukung Web Share API. Silakan salin hasil secara manual.</p><p><button class="btn" id="modalClose">Tutup</button></p>'); document.getElementById('modalClose').addEventListener('click', hideModal); }
-  });
-
+  shareBtn.addEventListener('click', async ()=>{ const text = dst.value || ''; if(navigator.share){ try{ await navigator.share({title:'Umandana', text}); } catch(e){} } else { showModal('<strong>Bagikan</strong><p>Peramban tidak mendukung Web Share API. Silakan salin hasil secara manual.</p><p><button class="btn" id="modalClose">Tutup</button></p>'); document.getElementById('modalClose').addEventListener('click', hideModal); } });
   downloadBtn.addEventListener('click', ()=>{
     const blob = new Blob([dst.value], {type:'text/plain;charset=utf-8'});
     const url = URL.createObjectURL(blob);
@@ -316,20 +446,17 @@
 
   how.addEventListener('click', (e)=>{ e.preventDefault(); const contoh = [ ['RUMAH','RUPRU MAHES'], ['ASING','AIDEN SIPRI STRENG'], ['MATA','MAIDEN TAIDEN'], ['BOLA','BOPRO LAIDEN'], ['DUNIA','DUPRU NIPRI AIDEN'] ].map(([a,b])=>`• ${a} → ${b}`).join('\n'); showModal('<strong>Contoh:</strong><pre style="white-space:pre-wrap">'+contoh+'</pre><p><button class="btn" id="modalOk">Tutup</button></p>'); document.getElementById('modalOk').addEventListener('click', hideModal); });
 
-  // seed demo
   src.value = 'KITA PERGI MAKAN DI RUMAH TEMAN MALAM INI';
   syncOptionsVisibility(); update();
 
-  /* ====== Service Worker registration with update handling ====== */
+  // service worker registration (sama seperti sebelumnya)
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/sw.js').then(reg=>{
-      // listen for updates
-      if(reg.waiting){ /* there's an update already */ showToast('Versi baru tersedia — muat ulang halaman untuk memperbarui'); }
+      if(reg.waiting){ showToast('Versi baru tersedia — muat ulang halaman untuk memperbarui'); }
       reg.addEventListener('updatefound', ()=> {
         const installing = reg.installing;
         installing.addEventListener('statechange', ()=> {
           if(installing.state === 'installed' && navigator.serviceWorker.controller){
-            // new update installed, notify user
             showModal('<strong>Pembaruan tersedia</strong><p>Versi baru aplikasi tersedia. Segera muat ulang agar perubahan diterapkan.</p><p><button class="btn" id="reloadNow">Muat Ulang</button> <button class="btn" id="dismiss">Nanti</button></p>');
             document.getElementById('reloadNow').addEventListener('click', ()=>{ location.reload(true); });
             document.getElementById('dismiss').addEventListener('click', hideModal);
@@ -337,68 +464,45 @@
         });
       });
     }).catch(()=>{ /* ignore sw fail */ });
-    // message handler to skipWaiting from SW (optional)
     navigator.serviceWorker.addEventListener('message', evt => { if(evt.data && evt.data.type === 'RELOAD_PAGE') location.reload(); });
   }
 
-  /* ====== Analytics opt-in + Firebase init (modular) ====== */
-  // load saved preference (default: false)
+  // analytics opt-in kept as before (no auto-init unless you configure)
   const pref = localStorage.getItem('umandana-allow-analytics');
-  if(pref === 'true'){ allowAnalytics.checked = true; initFirebase(true); } else { allowAnalytics.checked = false; }
-  allowAnalytics.addEventListener('change', (e)=>{
-    const allow = !!e.target.checked;
-    localStorage.setItem('umandana-allow-analytics', allow ? 'true' : 'false');
-    if(allow) initFirebase(true);
-    else showToast('Analytics dimatikan (opsional)');
-  });
+  if(pref === 'true'){ if(allowAnalytics) allowAnalytics.checked = true; initFirebase(true); } else { if(allowAnalytics) allowAnalytics.checked = false; }
+  if(allowAnalytics) allowAnalytics.addEventListener('change', (e)=>{ const allow = !!e.target.checked; localStorage.setItem('umandana-allow-analytics', allow ? 'true' : 'false'); if(allow) initFirebase(true); else showToast('Analytics dimatikan (opsional)'); });
 
-  // lazy init firebase only when user allows
   async function initFirebase(enable){
     if(!enable) return;
+    // safe check: don't attempt if config placeholders still present
+    const firebaseConfig = {
+      apiKey: "REPLACE_API_KEY",
+      authDomain: "REPLACE_AUTH_DOMAIN",
+      projectId: "REPLACE_PROJECT_ID",
+      storageBucket: "REPLACE_STORAGE_BUCKET",
+      messagingSenderId: "REPLACE_MESSAGING_SENDER_ID",
+      appId: "REPLACE_APP_ID",
+      measurementId: "REPLACE_MEASUREMENT_ID"
+    };
+    if(!firebaseConfig.measurementId || firebaseConfig.measurementId.includes('REPLACE')){
+      console.warn('Firebase analytics not initialized — measurementId missing.');
+      return;
+    }
     try{
-      // dynamic import: load only bila diizinkan
       const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js');
       const { getAnalytics, logEvent } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js');
       const { getPerformance } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-perf.js');
-
-      // GANTI KONFIGURASI DENGAN MILIKMU
-      const firebaseConfig = {
-        apiKey: "REPLACE_API_KEY",
-        authDomain: "REPLACE_AUTH_DOMAIN",
-        projectId: "REPLACE_PROJECT_ID",
-        storageBucket: "REPLACE_STORAGE_BUCKET",
-        messagingSenderId: "REPLACE_MESSAGING_SENDER_ID",
-        appId: "REPLACE_APP_ID",
-        measurementId: "REPLACE_MEASUREMENT_ID"
-      };
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       try{ getPerformance(app); }catch(e){}
       window._um_analytics = analytics;
-      // sample log
       logEvent(analytics, 'app_opened');
-      // helper to report errors
-      window.reportAppError = function(err, meta = {}){
-        try{
-          const msg = (err && err.message) ? err.message : String(err);
-          const stack = (err && err.stack) ? err.stack : '';
-          logEvent(analytics, 'app_error', Object.assign({ message: msg, stack }, meta));
-        }catch(e){}
-      };
-      window.addEventListener('error', ev => { reportAppError(ev.error || ev.message, { filename: ev.filename, lineno: ev.lineno, colno: ev.colno }); });
-      window.addEventListener('unhandledrejection', ev => { reportAppError(ev.reason || 'unhandledrejection'); });
       showToast('Analytics aktif (anonim)');
-    }catch(e){ console.warn('Firebase init gagal', e); showToast('Gagal inisialisasi analytics'); }
-  }
-
-  /* small helper for toast copy used by shortcut */
-  async function copyToClipboard(text){
-    try{ await navigator.clipboard.writeText(text); showToast('Hasil disalin!'); }
-    catch(e){ const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); showToast('Hasil disalin (fallback)'); } catch(_){ showToast('Gagal menyalin'); } ta.remove(); }
+    }catch(e){ console.warn('Firebase init gagal', e); showToast('Analytics tidak tersedia'); }
   }
 
 })();
 </script>
 
 </body>
-  </html>
+</html>
