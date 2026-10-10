@@ -43,7 +43,7 @@ Kunjungi aplikasi online di sini:
 
 ## 🧑‍💻 Pembuat
 Dibuat dengan ❤️ oleh **El Padri**  
-- GitHub: [@ElPadri](https://github.com/ElPadri)
-- WhatsApp: [+62 856-5837-9941](https://wa.me/6285658379941)
+- GitHub: [@ElPadri](https://github.com/)
+- WhatsApp: [+62 856-5837-9941](https://wa.me/62)
 
 *Terinspirasi dari percakapan santai Muthe JKT48 bersama keluarganya.*
