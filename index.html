@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f172a">
   <title>Umandana Translator — Dua Arah</title>
 
-  <!-- Cocok untuk GitHub Pages -->
+  <!-- Cocok untuk GitHub Pages & PWA -->
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -455,7 +455,7 @@
     <div class="subtitle">TUGU JUANG DURIAN LUNCUK</div>
 
     <div class="grid">
-      <div class="card" aria-hidden="false">
+      <div class="card">
         <div class="body">
           <h3>Teks Asli</h3>
           <textarea id="src" placeholder="Tulis teks di sini…" maxlength="5000" aria-label="Teks asli"></textarea>
@@ -506,7 +506,7 @@
     <div class="footer">
       © <span id="year"></span> — Umandana Translator. Dibuat oleh El Padri.
 
-      <div class="footer-links" aria-hidden="false" style="margin-top:8px">
+      <div class="footer-links" style="margin-top:8px">
         <a href="privacy.html" id="linkPrivacy" target="_blank" rel="noopener noreferrer">Kebijakan Privasi</a>
         <a href="terms.html" id="linkTerms" target="_blank" rel="noopener noreferrer">Syarat &amp; Ketentuan</a>
         <a href="#" id="how">Contoh</a>
@@ -558,13 +558,12 @@
       const modeIdToUm = el('modeIdToUm');
       const modeUmToId = el('modeUmToId');
       const endOnlyWrap = el('endOnlyWrap');
-      const strictWrap = el('strictWrap');
       const themeSel = el('themeSel');
       const randomThemeBtn = el('randomTheme');
       const autoRotate = el('autoRotate');
       const allowAnalytics = el('allowAnalytics');
 
-      function debounce(fn, wait=180){
+      function debounce(fn, wait=140){
         let t = null;
         return function(...args){
           clearTimeout(t);
@@ -606,7 +605,6 @@
         if(meta && e.key === 'Enter'){
           e.preventDefault();
           copyToClipboard(dst.value);
-          showToast('Hasil disalin');
         }
       });
 
@@ -647,7 +645,6 @@
       if(randomThemeBtn){
         randomThemeBtn.addEventListener('click', () => {
           let pick;
-
           do{
             pick = THEMES[Math.floor(Math.random() * THEMES.length)];
           } while(pick === document.body.getAttribute('data-theme'));
@@ -702,9 +699,7 @@
         document.body.appendChild(elc);
 
         setTimeout(() => {
-          try{
-            elc.remove();
-          }catch(e){}
+          try{ elc.remove(); }catch(e){}
         }, duration + delay + 400);
       }
 
@@ -736,16 +731,11 @@
       }
 
       const vokalMap = {
-        A:'AIDEN',
-        a:'aiden',
-        I:'IPRI',
-        i:'ipri',
-        U:'UPRU',
-        u:'upru',
-        E:'EPRE',
-        e:'epre',
-        O:'OPRO',
-        o:'opro'
+        A:'AIDEN', a:'aiden',
+        I:'IPRI',  i:'ipri',
+        U:'UPRU',  u:'upru',
+        E:'EPRE',  e:'epre',
+        O:'OPRO',  o:'opro'
       };
 
       function plusEs(ch, up){
@@ -810,7 +800,6 @@
 
               if(lastAlpha && !isVowel(lastAlpha)){
                 const endsWithStreng = out.endsWith(up ? 'STRENG' : 'streng');
-
                 if(!endsWithStreng){
                   out += up ? 'ES' : 'es';
                 }
@@ -830,6 +819,7 @@
         if(!input) return '';
 
         const tokens = input.split(/(\s+)/);
+        const isStrictMode = strict.checked;
 
         const decoded = tokens.map(tok => {
           if(/^\s+$/.test(tok)) return tok;
@@ -849,7 +839,13 @@
                  .replace(/epre/gi,  m => matchCase('e', m))
                  .replace(/opro/gi,  m => matchCase('o', m));
 
-            s = s.replace(/([bcdfghjklmnpqrstvwxyz])es\b/gi, '$1');
+            // Jika mode ketat aktif, hapus semua sisipan ES setelah konsonan
+            if(isStrictMode){
+              s = s.replace(/([bcdfghjklmnpqrstvwxyz])es/gi, '$1');
+            } else {
+              // Standar: hapus akhiran ES di ujung kata
+              s = s.replace(/([bcdfghjklmnpqrstvwxyz])es\b/gi, '$1');
+            }
 
             return s;
           });
@@ -862,11 +858,8 @@
 
       function syncOptionsVisibility(){
         const decoding = modeUmToId.checked;
-
         endOnly.disabled = decoding;
-        strict.disabled = decoding;
-        endOnlyWrap.style.opacity = decoding ? .6 : 1;
-        strictWrap.style.opacity = decoding ? .6 : 1;
+        endOnlyWrap.style.opacity = decoding ? .5 : 1;
       }
 
       function compute(){
@@ -891,12 +884,9 @@
       }, 140);
 
       src.addEventListener('input', () => {
-        const long = src.value.length > 2000;
-
-        if(long){
+        if(src.value.length > 2000){
           el('processingStatus').textContent = 'Memproses teks panjang...';
         }
-
         update();
       });
 
@@ -926,6 +916,7 @@
       });
 
       async function copyToClipboard(text){
+        if(!text) return;
         try{
           await navigator.clipboard.writeText(text);
           showToast('Hasil disalin!');
@@ -937,7 +928,7 @@
 
           try{
             document.execCommand('copy');
-            showToast('Hasil disalin');
+            showToast('Hasil disalin!');
           } catch(_){
             showToast('Gagal menyalin, silakan salin manual');
           }
@@ -952,18 +943,26 @@
 
       shareBtn.addEventListener('click', async () => {
         const text = dst.value || '';
+        if(!text){
+          showToast('Tidak ada teks untuk dibagikan');
+          return;
+        }
 
         if(navigator.share){
           try{
-            await navigator.share({title:'Umandana', text});
+            await navigator.share({title:'Umandana Translator', text});
           } catch(e){}
         } else {
-          showModal('<strong>Bagikan</strong><p>Browser tidak mendukung fitur bagikan. Silakan salin hasil secara manual.</p><p><button class="btn" id="modalClose">Tutup</button></p>');
+          showModal('<strong>Bagikan</strong><p>Browser tidak mendukung fitur bagikan langsung. Silakan salin hasil secara manual.</p><p><button class="btn" id="modalClose">Tutup</button></p>');
           document.getElementById('modalClose').addEventListener('click', hideModal);
         }
       });
 
       downloadBtn.addEventListener('click', () => {
+        if(!dst.value){
+          showToast('Tidak ada teks untuk diunduh');
+          return;
+        }
         const blob = new Blob([dst.value], {type:'text/plain;charset=utf-8'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -973,7 +972,6 @@
         a.click();
 
         URL.revokeObjectURL(url);
-
         showToast('File unduhan dibuat');
       });
 
@@ -988,7 +986,7 @@
           ['DUNIA','DUPRUNIPRIAIDEN']
         ].map(([a,b]) => `• ${a} → ${b}`).join('\n');
 
-        showModal('<strong>Contoh:</strong><pre style="white-space:pre-wrap">'+contoh+'</pre><p><button class="btn" id="modalOk">Tutup</button></p>');
+        showModal('<strong>Contoh Penerjemahan:</strong><pre style="white-space:pre-wrap;margin:10px 0;background:rgba(0,0,0,.2);padding:10px;border-radius:8px">'+contoh+'</pre><p><button class="btn" id="modalOk">Tutup</button></p>');
         document.getElementById('modalOk').addEventListener('click', hideModal);
       });
 
@@ -1008,7 +1006,7 @@
 
             installing.addEventListener('statechange', () => {
               if(installing.state === 'installed' && navigator.serviceWorker.controller){
-                showModal('<strong>Pembaruan tersedia</strong><p>Versi baru aplikasi tersedia. Segera muat ulang agar perubahan diterapkan.</p><p><button class="btn" id="reloadNow">Muat Ulang</button> <button class="btn" id="dismiss">Nanti</button></p>');
+                showModal('<strong>Pembaruan tersedia</strong><p>Versi baru aplikasi tersedia. Muat ulang halaman sekarang?</p><p><button class="btn" id="reloadNow">Muat Ulang</button> <button class="btn" id="dismiss">Nanti</button></p>');
 
                 document.getElementById('reloadNow').addEventListener('click', () => {
                   location.reload();
@@ -1019,7 +1017,7 @@
             });
           });
         }).catch(() => {
-          console.warn('Service worker gagal dimuat.');
+          // SW tidak wajib jika berjalan di localhost/lingkungan preview
         });
 
         navigator.serviceWorker.addEventListener('message', evt => {
@@ -1030,7 +1028,6 @@
       }
 
       const pref = localStorage.getItem('umandana-allow-analytics');
-
       if(pref === 'true'){
         if(allowAnalytics) allowAnalytics.checked = true;
         initFirebase(true);
@@ -1065,7 +1062,6 @@
         };
 
         if(!firebaseConfig.measurementId || firebaseConfig.measurementId.includes('REPLACE')){
-          console.warn('Firebase analytics belum diatur.');
           return;
         }
 
@@ -1087,7 +1083,6 @@
           showToast('Analytics aktif');
         } catch(e){
           console.warn('Firebase init gagal', e);
-          showToast('Analytics tidak tersedia');
         }
       }
     })();
