@@ -21,7 +21,7 @@ Bahasa Umandana adalah bahasa sandi/kode unik yang dipopulerkan oleh **Muthe JKT
 
 ## 🔗 Demo / Website
 Kunjungi aplikasi online di sini:  
-👉 **[https://elpadri.github.io/umandana-translator/](https://elpadri.github.io/umandana-translator/)**
+👉 **[https://elpadri.github.io/umandana-translator/](https://el48ai.github.io/umandana-translator/)**
 
 ---
 
